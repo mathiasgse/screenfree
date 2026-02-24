@@ -1,0 +1,177 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/typography';
+
+@theme {
+  --font-serif: 'DM Serif Display', serif;
+  --font-sans: 'DM Sans', sans-serif;
+
+  --color-stone-50: #faf9f7;
+  --color-stone-100: #f3f1ed;
+  --color-stone-200: #e8e4dd;
+  --color-stone-300: #d4cfc5;
+  --color-stone-400: #b0a898;
+  --color-stone-500: #8d8475;
+  --color-stone-600: #6b6358;
+  --color-stone-700: #4a443c;
+  --color-stone-800: #2d2924;
+  --color-stone-900: #1a1714;
+
+  --color-accent: #8b7355;
+  --color-accent-light: #a3845a;
+  --color-accent-dark: #705c42;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    color: var(--color-stone-700);
+    background-color: var(--color-stone-50);
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-serif);
+    color: var(--color-stone-900);
+  }
+
+  h1, h2 {
+    letter-spacing: -0.01em;
+  }
+
+  ::selection {
+    background: #d4c4a8;
+    color: #1a1714;
+  }
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Scroll-reveal transitions */
+.reveal-hidden {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s cubic-bezier(0.25, 0.1, 0.25, 1),
+              transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+.reveal-hidden.reveal-none { transform: translateY(0); }
+.reveal-visible { opacity: 1; transform: translateY(0); }
+
+/* Scroll indicator bounce */
+@keyframes scroll-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(8px); }
+}
+.animate-scroll-bounce {
+  animation: scroll-bounce 2s ease-in-out infinite;
+}
+
+/* Heading accent underline */
+.heading-accent::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 2px;
+  background-color: var(--color-accent);
+  margin-top: 12px;
+}
+
+/* Rich text blockquote accent */
+.prose blockquote {
+  border-left-color: var(--color-accent) !important;
+}
+
+/* Map slide-up animation */
+@keyframes slide-up {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+/* Overlay animations */
+@keyframes overlay-slide-in-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+@keyframes overlay-slide-out-right {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
+@keyframes overlay-slide-in-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@keyframes overlay-slide-out-up {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
+@keyframes overlay-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes overlay-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.animate-overlay-slide-in-right {
+  animation: overlay-slide-in-right 0.3s ease-out both;
+}
+.animate-overlay-slide-out-right {
+  animation: overlay-slide-out-right 0.3s ease-in both;
+}
+.animate-overlay-slide-in-up {
+  animation: overlay-slide-in-up 0.3s ease-out both;
+}
+.animate-overlay-slide-out-up {
+  animation: overlay-slide-out-up 0.3s ease-in both;
+}
+.animate-overlay-fade-in {
+  animation: overlay-fade-in 0.3s ease-out both;
+}
+.animate-overlay-fade-out {
+  animation: overlay-fade-out 0.3s ease-in both;
+}
+
+/* View Transitions: Card → ParallaxHero */
+::view-transition-group(*) {
+  animation-duration: 0.35s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  overflow: clip;
+}
+
+::view-transition-old(*),
+::view-transition-new(*) {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+::view-transition-old(*) {
+  animation-duration: 0.15s;
+  animation-timing-function: cubic-bezier(0.4, 0, 1, 1);
+}
+
+::view-transition-new(*) {
+  animation-duration: 0.2s;
+  animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 0s !important;
+  }
+}
