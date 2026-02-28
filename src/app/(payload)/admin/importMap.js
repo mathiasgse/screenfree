@@ -28,6 +28,7 @@ import { MetaImageComponent as MetaImageComponent_a8a977ebc872c5d5ea7ee689724c08
 import { PreviewComponent as PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { default as default_bc28d2e36a1ad950c166d9b82cc91652 } from '@/discovery/admin/components/OpenWebsiteButton'
 import { DiscoveryNavLink as DiscoveryNavLink_a2f189d8b8ae35d05635154dde672c2a } from '@/discovery/admin/components/DiscoveryNavLink'
+import { VercelBlobClientUploadHandler as VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e } from '@payloadcms/storage-vercel-blob/client'
 import { default as default_ad40a0d52f394d0caa072c2a58f90b7a } from '@/discovery/admin/components/DiscoveryInbox'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
@@ -62,6 +63,7 @@ export const importMap = {
   "@payloadcms/plugin-seo/client#PreviewComponent": PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@/discovery/admin/components/OpenWebsiteButton#default": default_bc28d2e36a1ad950c166d9b82cc91652,
   "@/discovery/admin/components/DiscoveryNavLink#DiscoveryNavLink": DiscoveryNavLink_a2f189d8b8ae35d05635154dde672c2a,
+  "@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler": VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e,
   "@/discovery/admin/components/DiscoveryInbox#default": default_ad40a0d52f394d0caa072c2a58f90b7a,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

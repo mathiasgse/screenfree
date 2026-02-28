@@ -35,18 +35,13 @@ const plugins: Plugin[] = [
       return (d.excerpt ?? d.intro ?? '') as string
     },
   }),
+  vercelBlobStorage({
+    collections: {
+      media: true,
+    },
+    token: process.env.BLOB_READ_WRITE_TOKEN || '',
+  }),
 ]
-
-if (process.env.BLOB_READ_WRITE_TOKEN) {
-  plugins.push(
-    vercelBlobStorage({
-      collections: {
-        media: true,
-      },
-      token: process.env.BLOB_READ_WRITE_TOKEN,
-    }),
-  )
-}
 
 export default buildConfig({
   admin: {
