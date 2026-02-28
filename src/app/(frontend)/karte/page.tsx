@@ -25,14 +25,6 @@ function placeToMapPlace(place: Place): MapPlace | null {
   const region = typeof place.region === 'object' ? place.region : null
   if (!region) return null
 
-  const gallery = (place.gallery ?? [])
-    .map((media) => {
-      const url = getImageUrl(media, 'card')
-      if (!url) return null
-      return { url, alt: getImageAlt(media) }
-    })
-    .filter((item): item is { url: string; alt: string } => item !== null)
-
   return {
     id: place.id,
     title: place.title,
@@ -42,10 +34,11 @@ function placeToMapPlace(place: Place): MapPlace | null {
     attributes: place.attributes ?? [],
     heroImageUrl: getImageUrl(place.heroImage, 'card'),
     heroImageAlt: getImageAlt(place.heroImage),
-    gallery,
     priceRange: place.priceRange ?? null,
     outboundUrl: place.outboundUrl ?? null,
     whyDisconnect: place.whyDisconnect?.map((item) => item.reason) ?? [],
+    quietnessLevel: place.quietnessLevel ? Number(place.quietnessLevel) : null,
+    quietnessTraits: place.quietnessTraits ?? [],
   }
 }
 

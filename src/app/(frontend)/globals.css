@@ -144,27 +144,31 @@
   animation: overlay-fade-out 0.3s ease-in both;
 }
 
-/* View Transitions: Card → ParallaxHero */
-::view-transition-group(*) {
-  animation-duration: 0.35s;
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-  overflow: clip;
+/* Hero entrance animation (direct load only, not SPA nav) */
+@keyframes hero-entrance {
+  from { opacity: 0; transform: scale(1.03); }
+  to { opacity: 1; transform: scale(1); }
+}
+.hero-entrance {
+  animation: hero-entrance 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-entrance { animation: none; }
 }
 
-::view-transition-old(*),
-::view-transition-new(*) {
-  height: 100%;
-  width: 100%;
-  object-fit: cover;
+/* View Transitions: Page cross-fade (next-view-transitions) */
+::view-transition-group(*) {
+  animation-duration: 0.4s;
+  animation-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 ::view-transition-old(*) {
-  animation-duration: 0.15s;
+  animation-duration: 0.2s;
   animation-timing-function: cubic-bezier(0.4, 0, 1, 1);
 }
 
 ::view-transition-new(*) {
-  animation-duration: 0.2s;
+  animation-duration: 0.3s;
   animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 }
 
@@ -174,4 +178,16 @@
   ::view-transition-new(*) {
     animation-duration: 0s !important;
   }
+}
+
+/* Calendar date picker animation */
+@keyframes calendar-fade-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-calendar-fade-in {
+  animation: calendar-fade-in 0.2s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-calendar-fade-in { animation: none; }
 }

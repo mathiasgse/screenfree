@@ -5,7 +5,9 @@ import Image from 'next/image'
 import Link from 'next/link'
 import type { MapPlace } from '@/lib/map-types'
 import { AttributeTag } from '@/components/AttributeTag'
+
 import { PriceRange } from '@/components/PriceRange'
+import { QuietnessProfile } from '@/components/QuietnessProfile'
 
 export function PlaceDetailOverlay({
   place,
@@ -84,13 +86,20 @@ export function PlaceDetailOverlay({
             <h3 className="font-serif text-2xl text-stone-900">{place.title}</h3>
             <p className="mt-1 text-sm text-stone-500">{place.region.title}</p>
 
+            {/* Quietness profile */}
+            {place.quietnessLevel && (
+              <div className="mt-3">
+                <QuietnessProfile level={place.quietnessLevel} traits={place.quietnessTraits} priceRange={place.priceRange} />
+              </div>
+            )}
+
             {/* Attributes + price */}
-            {(place.attributes.length > 0 || place.priceRange) && (
+            {(place.attributes.length > 0 || (!place.quietnessLevel && place.priceRange)) && (
               <div className="mt-4 flex flex-wrap items-center gap-2">
                 {place.attributes.map((attr) => (
                   <AttributeTag key={attr} attribute={attr} />
                 ))}
-                {place.priceRange && <PriceRange range={place.priceRange} />}
+                {!place.quietnessLevel && place.priceRange && <PriceRange range={place.priceRange} />}
               </div>
             )}
 
@@ -111,23 +120,6 @@ export function PlaceDetailOverlay({
               </div>
             )}
 
-            {/* Gallery */}
-            {place.gallery.length > 0 && (
-              <div className="mt-5 grid grid-cols-2 gap-2">
-                {place.gallery.map((img, i) => (
-                  <div key={i} className="relative aspect-[3/2] overflow-hidden rounded-lg">
-                    <Image
-                      src={img.url}
-                      alt={img.alt}
-                      fill
-                      className="object-cover"
-                      sizes="220px"
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-
             {/* Action links */}
             <div className="mt-6 flex flex-col gap-3">
               {place.outboundUrl && (
@@ -135,14 +127,15 @@ export function PlaceDetailOverlay({
                   href={place.outboundUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-sm text-accent transition-colors hover:text-accent-dark"
+                  className="group inline-flex items-center justify-center gap-1.5 rounded-sm bg-accent-dark px-5 py-2.5 text-sm font-medium tracking-wide text-white transition-all duration-300 hover:bg-accent"
                 >
-                  Website besuchen &rarr;
+                  Website besuchen
+                  <span className="inline-block transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true">&rarr;</span>
                 </a>
               )}
               <Link
                 href={`/orte/${place.slug}`}
-                className="inline-flex items-center gap-1 text-sm text-stone-600 transition-colors hover:text-stone-900"
+                className="inline-flex items-center justify-center gap-1.5 rounded-sm border border-stone-300 px-5 py-2.5 text-sm font-medium tracking-wide text-stone-600 transition-all duration-300 hover:border-stone-500 hover:text-stone-700"
               >
                 Mehr erfahren &rarr;
               </Link>
@@ -168,7 +161,7 @@ export function PlaceDetailOverlay({
         <div className="flex-1 overflow-y-auto scrollbar-hide">
           {/* Hero image */}
           {place.heroImageUrl ? (
-            <div className="relative mx-4 mt-3 aspect-[3/2] overflow-hidden rounded-xl">
+            <div className="relative mx-4 mt-3 aspect-[3/2] overflow-hidden rounded-md">
               <Image
                 src={place.heroImageUrl}
                 alt={place.heroImageAlt}
@@ -178,7 +171,7 @@ export function PlaceDetailOverlay({
               />
             </div>
           ) : (
-            <div className="mx-4 mt-3 aspect-[3/2] rounded-xl bg-stone-200" />
+            <div className="mx-4 mt-3 aspect-[3/2] rounded-md bg-stone-200" />
           )}
 
           {/* Close button */}
@@ -197,17 +190,23 @@ export function PlaceDetailOverlay({
             <h3 className="font-serif text-2xl text-stone-900">{place.title}</h3>
             <p className="mt-1 text-sm text-stone-500">{place.region.title}</p>
 
-            {(place.attributes.length > 0 || place.priceRange) && (
-              <div className="mt-3 flex flex-wrap items-center gap-2">
+            {place.quietnessLevel && (
+              <div className="mt-3">
+                <QuietnessProfile level={place.quietnessLevel} traits={place.quietnessTraits} priceRange={place.priceRange} />
+              </div>
+            )}
+
+            {(place.attributes.length > 0 || (!place.quietnessLevel && place.priceRange)) && (
+              <div className="mt-4 flex flex-wrap items-center gap-2">
                 {place.attributes.map((attr) => (
                   <AttributeTag key={attr} attribute={attr} />
                 ))}
-                {place.priceRange && <PriceRange range={place.priceRange} />}
+                {!place.quietnessLevel && place.priceRange && <PriceRange range={place.priceRange} />}
               </div>
             )}
 
             {place.whyDisconnect.length > 0 && (
-              <div className="mt-4">
+              <div className="mt-5">
                 <h4 className="text-xs font-medium uppercase tracking-wider text-stone-400">
                   Warum hier abschalten
                 </h4>
@@ -222,36 +221,21 @@ export function PlaceDetailOverlay({
               </div>
             )}
 
-            {place.gallery.length > 0 && (
-              <div className="mt-4 grid grid-cols-2 gap-2">
-                {place.gallery.map((img, i) => (
-                  <div key={i} className="relative aspect-[3/2] overflow-hidden rounded-lg">
-                    <Image
-                      src={img.url}
-                      alt={img.alt}
-                      fill
-                      className="object-cover"
-                      sizes="45vw"
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div className="mt-5 flex flex-col gap-3">
+            <div className="mt-6 flex flex-col gap-3">
               {place.outboundUrl && (
                 <a
                   href={place.outboundUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-sm text-accent transition-colors hover:text-accent-dark"
+                  className="group inline-flex items-center justify-center gap-1.5 rounded-sm bg-accent-dark px-5 py-2.5 text-sm font-medium tracking-wide text-white transition-all duration-300 hover:bg-accent"
                 >
-                  Website besuchen &rarr;
+                  Website besuchen
+                  <span className="inline-block transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true">&rarr;</span>
                 </a>
               )}
               <Link
                 href={`/orte/${place.slug}`}
-                className="inline-flex items-center gap-1 text-sm text-stone-600 transition-colors hover:text-stone-900"
+                className="inline-flex items-center justify-center gap-1.5 rounded-sm border border-stone-300 px-5 py-2.5 text-sm font-medium tracking-wide text-stone-600 transition-all duration-300 hover:border-stone-500 hover:text-stone-700"
               >
                 Mehr erfahren &rarr;
               </Link>

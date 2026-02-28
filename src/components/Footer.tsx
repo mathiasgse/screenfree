@@ -5,7 +5,7 @@ export function Footer() {
     <footer className="border-t border-stone-100 py-20 md:py-24">
       <div className="mx-auto flex max-w-7xl flex-col items-center gap-8 px-6 md:px-10">
         <Link href="/" className="font-serif text-2xl tracking-[0.2em] text-stone-300 transition-colors hover:text-accent">
-          STILL
+          Stille Orte
         </Link>
         <nav className="flex gap-8 text-sm text-stone-400">
           <Link href="/orte" className="transition-colors hover:text-accent">
@@ -28,7 +28,7 @@ export function Footer() {
           </Link>
         </nav>
         <p className="text-xs text-stone-300">
-          &copy; {new Date().getFullYear()} STILL
+          &copy; {new Date().getFullYear()} Stille Orte
         </p>
       </div>
     </footer>

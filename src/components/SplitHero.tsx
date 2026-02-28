@@ -14,6 +14,9 @@ export function SplitHero({
   regions,
   collections,
   counts,
+  trustOrteLabel = 'handverlesene Orte',
+  trustRegionenLabel = 'Regionen',
+  trustSammlungenLabel = 'Sammlungen',
 }: {
   media: string | Media | null | undefined
   priority?: boolean
@@ -25,6 +28,9 @@ export function SplitHero({
   regions?: { title: string; slug: string }[]
   collections?: { title: string; slug: string }[]
   counts?: { places: number; regions: number; collections: number }
+  trustOrteLabel?: string
+  trustRegionenLabel?: string
+  trustSammlungenLabel?: string
 }) {
   const url = getImageUrl(media, 'hero')
   const hasRegions = regions && regions.length > 0
@@ -54,26 +60,30 @@ export function SplitHero({
         <div className="mt-10 flex items-center gap-4">
           <Link
             href="/orte"
-            className="inline-flex h-12 items-center rounded-full border border-stone-200 px-8 text-sm font-medium tracking-wide text-stone-700 transition-colors duration-300 hover:bg-stone-100"
+            className="group inline-flex items-center gap-3 rounded-sm bg-accent-dark px-8 py-4 text-sm font-medium tracking-wide text-white transition-all duration-300 hover:bg-accent"
           >
             {ctaLabel}
-            <span className="ml-2" aria-hidden="true">→</span>
+            <span className="inline-block transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true">→</span>
           </Link>
           <Link
             href="/karte"
-            className="inline-flex h-12 items-center rounded-full border border-stone-200 px-8 text-sm font-medium tracking-wide text-stone-400 transition-colors duration-300 hover:text-stone-700 hover:bg-stone-100"
+            className="inline-flex items-center gap-2 rounded-sm border border-stone-300 px-8 py-4 text-sm font-medium tracking-wide text-stone-500 transition-all duration-300 hover:border-stone-500 hover:text-stone-700"
           >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" />
+              <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="currentColor" stroke="none" />
+            </svg>
             {mapCtaLabel}
           </Link>
         </div>
 
         {counts && counts.places > 0 && (
           <p className="mt-8 text-sm tracking-wide text-stone-400">
-            <span className="font-medium text-stone-700">{counts.places}</span> handverlesene Orte
+            <span className="font-medium text-stone-700">{counts.places}</span> {trustOrteLabel}
             <span className="text-stone-300"> · </span>
-            <span className="font-medium text-stone-700">{counts.regions}</span> Regionen
+            <span className="font-medium text-stone-700">{counts.regions}</span> {trustRegionenLabel}
             <span className="text-stone-300"> · </span>
-            <span className="font-medium text-stone-700">{counts.collections}</span> Sammlungen
+            <span className="font-medium text-stone-700">{counts.collections}</span> {trustSammlungenLabel}
           </p>
         )}
 

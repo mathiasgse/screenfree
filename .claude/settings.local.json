@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:payloadcms.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm build:*)",
+      "Bash(docker compose:*)",
+      "Bash(kill:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(test:*)",
+      "Bash(pnpm generate:importmap:*)",
+      "Bash(grep:*)",
+      "Bash(cat /Users/mathiasgsell/.claude/projects/-Users-mathiasgsell-Documents-Developer-Webdevelopement-screenfree/ee3068c0-d2e9-4524-a6b5-f5e35f006fd2/tool-results/toolu_01EWxbHwdRfyvAkDPbP2KMpJ.json | python3 -c \"import json,sys; data=json.load\\(sys.stdin\\); print\\(data[0]['text']\\)\" > /tmp/plan_output.txt)",
+      "WebFetch(domain:www.huetten.com)",
+      "WebFetch(domain:www.huettenland.com)"
+    ]
+  }
+}

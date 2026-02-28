@@ -3,14 +3,18 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
+import Image from 'next/image'
 import { Container } from '@/components/Container'
 import { ParallaxHero } from '@/components/ParallaxHero'
 import { ScrollReveal } from '@/components/ScrollReveal'
 import { StaggerGrid, StaggerItem } from '@/components/StaggerGrid'
 import { PlaceCard } from '@/components/PlaceCard'
-import { getImageUrl } from '@/lib/media'
+import { RichTextRenderer } from '@/components/RichTextRenderer'
+import { FaqSection } from '@/components/FaqSection'
+import { getImageUrl, getImageAlt } from '@/lib/media'
 import { JsonLd } from '@/components/JsonLd'
-import type { Place } from '@/payload-types'
+import type { Place, Collection as CollectionType } from '@/payload-types'
 
 type Args = {
   params: Promise<{ slug: string }>
@@ -23,6 +27,7 @@ export async function generateStaticParams() {
     const payload = await getPayload({ config })
     const collections = await payload.find({
       collection: 'collections',
+      where: { _status: { equals: 'published' } },
       limit: 1000,
     })
 
@@ -39,7 +44,7 @@ export async function generateMetadata({ params }: Args): Promise<Metadata> {
   const payload = await getPayload({ config })
   const result = await payload.find({
     collection: 'collections',
-    where: { slug: { equals: slug } },
+    where: { slug: { equals: slug }, _status: { equals: 'published' } },
     limit: 1,
     depth: 2,
   })
@@ -49,17 +54,20 @@ export async function generateMetadata({ params }: Args): Promise<Metadata> {
 
   const heroUrl = getImageUrl(collection.heroImage, 'hero')
 
-  const description = collection.intro || `${collection.title} — Eine kuratierte Sammlung stiller Orte.`
+  const meta = collection.meta
+  const title = meta?.title || (collection as unknown as Record<string, unknown>).seoTitle as string || collection.title
+  const description = meta?.description || (collection as unknown as Record<string, unknown>).seoDescription as string || collection.excerpt || collection.intro || `${collection.title} — Eine kuratierte Sammlung stiller Orte.`
+  const ogImage = meta?.image && typeof meta.image === 'object' ? getImageUrl(meta.image, 'hero') : heroUrl
 
   return {
-    title: collection.title,
+    title,
     description,
     alternates: { canonical: `/sammlungen/${slug}` },
     openGraph: {
-      title: collection.title,
+      title,
       description,
       url: `/sammlungen/${slug}`,
-      ...(heroUrl ? { images: [{ url: heroUrl }] } : {}),
+      ...(ogImage ? { images: [{ url: ogImage }] } : {}),
     },
   }
 }
@@ -70,7 +78,10 @@ export default async function CollectionPage({ params }: Args) {
   const payload = await getPayload({ config })
   const result = await payload.find({
     collection: 'collections',
-    where: { slug: { equals: slug } },
+    where: {
+      slug: { equals: slug },
+      ...(isDraft ? {} : { _status: { equals: 'published' } }),
+    },
     limit: 1,
     depth: 2,
     draft: isDraft,
@@ -82,6 +93,15 @@ export default async function CollectionPage({ params }: Args) {
   const places = (collection.places?.filter(
     (p): p is Place => typeof p === 'object',
   ) ?? [])
+
+  const relatedCollections = (collection.relatedCollections?.filter(
+    (c): c is CollectionType => typeof c === 'object',
+  ) ?? [])
+
+  const faqItems = (collection.faq ?? []).map((f) => ({
+    question: f.question,
+    answer: f.answer,
+  }))
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://still.place'
 
@@ -96,23 +116,77 @@ export default async function CollectionPage({ params }: Args) {
         </div>
       )}
 
+      {/* CollectionPage + ItemList JSON-LD */}
       <JsonLd
         data={{
           '@context': 'https://schema.org',
-          '@type': 'ItemList',
+          '@type': 'CollectionPage',
           name: collection.title,
-          numberOfItems: places.length,
-          itemListElement: places.map((place, i) => ({
-            '@type': 'ListItem',
-            position: i + 1,
-            url: `${siteUrl}/orte/${place.slug}`,
-            name: place.title,
-          })),
+          ...(collection.excerpt || collection.intro
+            ? { description: collection.excerpt || collection.intro }
+            : {}),
+          url: `${siteUrl}/sammlungen/${slug}`,
+          mainEntity: {
+            '@type': 'ItemList',
+            numberOfItems: places.length,
+            itemListElement: places.map((place, i) => ({
+              '@type': 'ListItem',
+              position: i + 1,
+              url: `${siteUrl}/orte/${place.slug}`,
+              name: place.title,
+            })),
+          },
+        }}
+      />
+
+      {/* FAQ JSON-LD */}
+      {faqItems.length > 0 && (
+        <JsonLd
+          data={{
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: faqItems.map((f) => ({
+              '@type': 'Question',
+              name: f.question,
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: f.answer,
+              },
+            })),
+          }}
+        />
+      )}
+
+      {/* BreadcrumbList JSON-LD */}
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Stille Orte',
+              item: siteUrl,
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: 'Sammlungen',
+              item: `${siteUrl}/sammlungen`,
+            },
+            {
+              '@type': 'ListItem',
+              position: 3,
+              name: collection.title,
+              item: `${siteUrl}/sammlungen/${slug}`,
+            },
+          ],
         }}
       />
 
       {/* Full-Viewport Hero */}
-      <ParallaxHero media={collection.heroImage} priority>
+      <ParallaxHero media={collection.heroImage} priority animate>
         <Container>
           <h1 className="font-serif text-4xl leading-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
             {collection.title}
@@ -126,6 +200,15 @@ export default async function CollectionPage({ params }: Args) {
             <p className="mx-auto max-w-3xl text-xl leading-relaxed text-stone-500">
               {collection.intro}
             </p>
+          </ScrollReveal>
+        )}
+
+        {/* Editorial Content */}
+        {collection.content && (
+          <ScrollReveal>
+            <div className="mx-auto mt-12 max-w-3xl">
+              <RichTextRenderer data={collection.content} />
+            </div>
           </ScrollReveal>
         )}
 
@@ -168,6 +251,60 @@ export default async function CollectionPage({ params }: Args) {
             )}
           </div>
         )}
+
+        {/* FAQ */}
+        {faqItems.length > 0 && (
+          <ScrollReveal>
+            <div className="mx-auto mt-16 max-w-3xl">
+              <FaqSection items={faqItems} />
+            </div>
+          </ScrollReveal>
+        )}
+
+        {/* Related Collections */}
+        {relatedCollections.length > 0 && (
+          <ScrollReveal>
+            <div className="mx-auto mt-16 max-w-3xl border-t border-stone-200 pt-10">
+              <p className="mb-6 text-xs font-medium uppercase tracking-widest text-accent">
+                Verwandte Sammlungen
+              </p>
+              <div className="grid gap-4 sm:grid-cols-3">
+                {relatedCollections.map((col) => (
+                  <Link key={col.id} href={`/sammlungen/${col.slug}`} className="group block">
+                    <div className="relative aspect-[3/2] overflow-hidden rounded-md bg-stone-200">
+                      {getImageUrl(col.heroImage, 'card') && (
+                        <Image
+                          src={getImageUrl(col.heroImage, 'card')!}
+                          alt={getImageAlt(col.heroImage)}
+                          fill
+                          className="object-cover transition-all duration-500 group-hover:scale-[1.03]"
+                          sizes="(max-width: 640px) 100vw, 33vw"
+                          loading="lazy"
+                        />
+                      )}
+                    </div>
+                    <h3 className="mt-2 font-serif text-sm text-stone-700 transition-colors group-hover:text-accent">
+                      {col.title}
+                    </h3>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </ScrollReveal>
+        )}
+
+        {/* Back Link */}
+        <ScrollReveal>
+          <div className="mx-auto mt-16 max-w-3xl border-t border-stone-200 pt-10">
+            <Link
+              href="/sammlungen"
+              className="inline-flex items-center gap-2 text-sm tracking-wide text-stone-500 transition-colors hover:text-accent"
+            >
+              <span aria-hidden="true">&larr;</span>
+              Zurück zu allen Sammlungen
+            </Link>
+          </div>
+        </ScrollReveal>
       </Container>
     </main>
   )

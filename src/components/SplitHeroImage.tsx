@@ -20,11 +20,18 @@ export function SplitHeroImage({
   useEffect(() => {
     const el = ref.current
     if (!el) return
+    let ticking = false
 
     function handleScroll() {
-      const rect = el!.getBoundingClientRect()
-      if (rect.bottom < 0 || rect.top > window.innerHeight) return
-      setOffsetY(Math.max(0, Math.min(1, -rect.top / rect.height)) * 8)
+      if (ticking) return
+      ticking = true
+      requestAnimationFrame(() => {
+        const rect = el!.getBoundingClientRect()
+        if (rect.bottom >= 0 && rect.top <= window.innerHeight) {
+          setOffsetY(Math.max(0, Math.min(1, -rect.top / rect.height)) * 8)
+        }
+        ticking = false
+      })
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true })

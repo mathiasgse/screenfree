@@ -4,7 +4,9 @@ import config from '@payload-config'
 import { notFound } from 'next/navigation'
 import { Container } from '@/components/Container'
 import { PlaceCard } from '@/components/PlaceCard'
-import type { Place } from '@/payload-types'
+import { JsonLd } from '@/components/JsonLd'
+import { getImageUrl } from '@/lib/media'
+import type { Place, Homepage } from '@/payload-types'
 
 type Args = {
   params: Promise<{ slug: string }>
@@ -40,16 +42,21 @@ export async function generateMetadata({ params }: Args): Promise<Metadata> {
   const region = result.docs[0]
   if (!region) return { title: 'Region nicht gefunden' }
 
-  const description = region.intro || `${region.title} — Stille Orte in der Region.`
+  const meta = region.meta
+  const title = meta?.title || (region as unknown as Record<string, unknown>).seoTitle as string || region.title
+  const description = meta?.description || (region as unknown as Record<string, unknown>).seoDescription as string || region.intro || `${region.title} — Stille Orte in der Region.`
+  const heroUrl = getImageUrl(region.heroImage, 'hero')
+  const ogImage = meta?.image && typeof meta.image === 'object' ? getImageUrl(meta.image, 'hero') : heroUrl
 
   return {
-    title: region.title,
+    title,
     description,
     alternates: { canonical: `/region/${slug}` },
     openGraph: {
-      title: region.title,
+      title,
       description,
       url: `/region/${slug}`,
+      ...(ogImage ? { images: [{ url: ogImage }] } : {}),
     },
   }
 }
@@ -66,21 +73,76 @@ export default async function RegionPage({ params }: Args) {
   const region = result.docs[0]
   if (!region) notFound()
 
-  const placesResult = await payload.find({
-    collection: 'places',
-    where: {
-      region: { equals: region.id },
-      _status: { equals: 'published' },
-    },
-    depth: 2,
-    limit: 100,
-    sort: '-createdAt',
-  })
+  const [placesResult, homepageResult] = await Promise.all([
+    payload.find({
+      collection: 'places',
+      where: {
+        region: { equals: region.id },
+        _status: { equals: 'published' },
+      },
+      depth: 2,
+      limit: 100,
+      sort: '-createdAt',
+    }),
+    payload.findGlobal({ slug: 'homepage' }),
+  ])
 
   const places = placesResult.docs as Place[]
+  const homepage = homepageResult as Homepage
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://still.place'
 
   return (
     <main>
+      {/* CollectionPage + ItemList JSON-LD */}
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'CollectionPage',
+          name: region.title,
+          ...(region.intro ? { description: region.intro } : {}),
+          url: `${siteUrl}/region/${slug}`,
+          mainEntity: {
+            '@type': 'ItemList',
+            numberOfItems: places.length,
+            itemListElement: places.map((place, i) => ({
+              '@type': 'ListItem',
+              position: i + 1,
+              url: `${siteUrl}/orte/${place.slug}`,
+              name: place.title,
+            })),
+          },
+        }}
+      />
+
+      {/* BreadcrumbList JSON-LD */}
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Stille Orte',
+              item: siteUrl,
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: 'Regionen',
+              item: `${siteUrl}/region`,
+            },
+            {
+              '@type': 'ListItem',
+              position: 3,
+              name: region.title,
+              item: `${siteUrl}/region/${slug}`,
+            },
+          ],
+        }}
+      />
+
       <Container className="pt-28 pb-12 md:pb-16">
         <h1 className="heading-accent font-serif text-3xl leading-tight sm:text-4xl md:text-5xl">
           {region.title}
@@ -99,7 +161,7 @@ export default async function RegionPage({ params }: Args) {
           </div>
         ) : (
           <p className="mt-12 text-stone-400">
-            Bald mehr Orte in dieser Region.
+            {homepage?.regionEmptyMessage || 'Bald mehr Orte in dieser Region.'}
           </p>
         )}
       </Container>

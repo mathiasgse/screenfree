@@ -1,0 +1,31 @@
+# Hütten-URLs für STILL Import
+# Eine URL pro Zeile. Leere Zeilen und #-Kommentare werden ignoriert.
+#
+# Unterstützte Plattformen:
+#   - huetten.com    (z.B. https://www.huetten.com/de/huette/landeckalm-rt30409.html)
+#   - huettenland.com (z.B. https://www.huettenland.com/huette/1584/Joslbauer-Schmiedn-im-Murtal/)
+#
+# Aufruf:
+#   npx tsx src/discovery/worker/scrape-cli.ts --file data/huetten-urls.txt
+#   npx tsx src/discovery/worker/scrape-cli.ts --file data/huetten-urls.txt --dry-run
+
+# huetten.com — Tirol
+
+
+# huetten.com — Salzburg
+
+
+# huettenland.com — Allgemein
+https://www.huettenland.com/huette/1114/Panorama-Blockhuette-in-Tirol/
+https://www.huettenland.com/huette/1348/Chalet-LovelyNest-in-Hohentauern/
+https://www.huettenland.com/huette/1344/Berglodge-Unterweger-im-Passeiertal/
+https://www.huettenland.com/huette/799/Duracher-Huette-Osttiroler-Dolomiten/
+https://www.huettenland.com/huette/1154/Kerschbaumer-Huette-Weststeiermark/
+https://www.huettenland.com/huette/1248/Moaraste-Kolsassberg/
+https://www.huettenland.com/huette/1014/Bio-Blockhuette-mit-Sauna-im-Drautal/
+https://www.huettenland.com/huette/1262/Willis-Huette-im-Ahrntal/
+https://www.huettenland.com/huette/1114/Panorama-Blockhuette-in-Tirol/
+
+
+# huettenland.com — Kärnten
+

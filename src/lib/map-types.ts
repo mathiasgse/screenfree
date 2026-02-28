@@ -7,8 +7,9 @@ export interface MapPlace {
   attributes: string[]
   heroImageUrl: string | null
   heroImageAlt: string
-  gallery: { url: string; alt: string }[]
   priceRange: string | null
   outboundUrl: string | null
   whyDisconnect: string[]
+  quietnessLevel: number | null
+  quietnessTraits: string[]
 }

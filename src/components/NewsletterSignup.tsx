@@ -2,7 +2,11 @@
 
 import { useState } from 'react'
 
-export function NewsletterSignup() {
+export function NewsletterSignup({
+  heading = 'Neue stille Orte, direkt in deinem Postfach.',
+}: {
+  heading?: string
+}) {
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle')
 
@@ -28,10 +32,11 @@ export function NewsletterSignup() {
   }
 
   return (
-    <section className="border-t-2 border-accent bg-stone-100 py-20 md:py-28">
+    <section className="border-t border-stone-200 bg-stone-100 py-20 md:py-28">
       <div className="mx-auto max-w-2xl px-6 text-center">
-        <h2 className="font-serif text-2xl text-stone-800 sm:text-3xl">
-          Neue stille Orte, direkt in deinem Postfach.
+        <p className="text-xs font-medium uppercase tracking-widest text-accent">Bleib informiert</p>
+        <h2 className="mt-4 font-serif text-3xl text-stone-800 sm:text-4xl">
+          {heading}
         </h2>
         {status === 'success' ? (
           <p className="mt-6 text-stone-600">Danke! Du hörst bald von uns.</p>

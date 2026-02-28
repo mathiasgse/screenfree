@@ -28,5 +28,10 @@ export const Regions: CollectionConfig = {
       name: 'intro',
       type: 'textarea',
     },
+    {
+      name: 'heroImage',
+      type: 'upload',
+      relationTo: 'media',
+    },
   ],
 }

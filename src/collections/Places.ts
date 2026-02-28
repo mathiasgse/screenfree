@@ -1,5 +1,5 @@
 import type { CollectionConfig } from 'payload'
-import { ATTRIBUTE_OPTIONS } from '@/lib/constants'
+import { ATTRIBUTE_OPTIONS, AUDIENCE_OPTIONS, QUIETNESS_LEVELS, QUIETNESS_TRAIT_OPTIONS } from '@/lib/constants'
 import { slugFromTitle } from '@/hooks/slugFromTitle'
 
 export const Places: CollectionConfig = {
@@ -80,6 +80,47 @@ export const Places: CollectionConfig = {
       },
     },
     {
+      name: 'audience',
+      type: 'select',
+      hasMany: true,
+      label: 'Für wen geeignet',
+      options: [...AUDIENCE_OPTIONS],
+      admin: {
+        description: 'Zielgruppe auswählen',
+      },
+    },
+    {
+      type: 'collapsible',
+      label: 'Ruheprofil',
+      admin: {
+        initCollapsed: true,
+      },
+      fields: [
+        {
+          name: 'quietnessLevel',
+          type: 'select',
+          label: 'Ruhe-Level',
+          options: QUIETNESS_LEVELS.map((l) => ({
+            label: `${l.value} — ${l.label}`,
+            value: String(l.value),
+          })),
+          admin: {
+            description: '1 = Ruhig, 2 = Sehr ruhig, 3 = Absolut still',
+          },
+        },
+        {
+          name: 'quietnessTraits',
+          type: 'select',
+          hasMany: true,
+          label: 'Ruhe-Merkmale',
+          options: [...QUIETNESS_TRAIT_OPTIONS],
+          admin: {
+            description: 'Konkrete Merkmale, die den Ort ruhig machen',
+          },
+        },
+      ],
+    },
+    {
       name: 'priceRange',
       type: 'select',
       label: 'Preisklasse',
@@ -108,6 +149,31 @@ export const Places: CollectionConfig = {
       label: 'Website',
       admin: {
         description: 'Link zur offiziellen Website',
+      },
+    },
+    {
+      name: 'contactEmail',
+      type: 'email',
+      label: 'Kontakt-E-Mail (für Anfragen)',
+      admin: {
+        description: 'Wird für Buchungsanfragen verwendet — nie öffentlich sichtbar',
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'whyDisconnectHeading',
+      type: 'text',
+      label: 'Überschrift "Warum hier abschalten"',
+      admin: {
+        description: 'Optional — Standard: "Warum hier abschalten"',
+      },
+    },
+    {
+      name: 'ctaLabel',
+      type: 'text',
+      label: 'CTA-Text (Website besuchen)',
+      admin: {
+        description: 'Optional — Standard: "Website besuchen"',
       },
     },
   ],

@@ -17,9 +17,10 @@ export default function Error({
         </p>
         <button
           onClick={reset}
-          className="mt-8 inline-block text-sm tracking-wide text-accent transition-colors hover:text-stone-700"
+          className="group mt-8 inline-flex items-center gap-3 rounded-sm bg-accent-dark px-8 py-4 text-sm tracking-wide text-white transition-all duration-300 hover:bg-accent"
         >
-          Erneut versuchen &rarr;
+          Erneut versuchen
+          <span className="inline-block transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true">&rarr;</span>
         </button>
       </Container>
     </main>

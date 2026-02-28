@@ -20,8 +20,7 @@ export function BlogCard({
     return (
       <Link href={`/journal/${post.slug}`} className="group flex h-full flex-col">
         <div
-          className="relative min-h-[350px] flex-1 overflow-hidden rounded-md bg-stone-200"
-          style={{ viewTransitionName: `blog-hero-${post.slug}`, contain: 'layout' }}
+          className="relative min-h-[350px] flex-1 overflow-hidden rounded-md bg-stone-200 ring-1 ring-inset ring-black/5"
         >
           {imageUrl && (
             <Image
@@ -52,8 +51,7 @@ export function BlogCard({
   return (
     <Link href={`/journal/${post.slug}`} className="group block">
       <div
-        className="relative aspect-[3/2] overflow-hidden rounded-md bg-stone-200"
-        style={{ viewTransitionName: `blog-hero-${post.slug}`, contain: 'layout' }}
+        className="relative aspect-[3/2] overflow-hidden rounded-md bg-stone-200 ring-1 ring-inset ring-black/5 shadow-sm transition-shadow duration-500 group-hover:shadow-md"
       >
         {imageUrl && (
           <Image

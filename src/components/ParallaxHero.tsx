@@ -4,31 +4,40 @@ import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import type { Media } from '@/payload-types'
 import { getImageUrl, getImageAlt } from '@/lib/media'
+import { useIsDirectLoad } from '@/hooks/useIsDirectLoad'
 
 export function ParallaxHero({
   media,
   priority = false,
   overlay = true,
-  transitionName,
+  animate = false,
   children,
 }: {
   media: string | Media | null | undefined
   priority?: boolean
   overlay?: boolean
-  transitionName?: string
+  animate?: boolean
   children?: React.ReactNode
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const [offsetY, setOffsetY] = useState(0)
+  const isDirectLoad = useIsDirectLoad()
 
   useEffect(() => {
     const el = ref.current
     if (!el) return
+    let ticking = false
 
     function handleScroll() {
-      const rect = el!.getBoundingClientRect()
-      if (rect.bottom < 0 || rect.top > window.innerHeight) return
-      setOffsetY(Math.max(0, Math.min(1, -rect.top / rect.height)) * 20)
+      if (ticking) return
+      ticking = true
+      requestAnimationFrame(() => {
+        const rect = el!.getBoundingClientRect()
+        if (rect.bottom >= 0 && rect.top <= window.innerHeight) {
+          setOffsetY(Math.max(0, Math.min(1, -rect.top / rect.height)) * 20)
+        }
+        ticking = false
+      })
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true })
@@ -39,11 +48,13 @@ export function ParallaxHero({
   const url = getImageUrl(media, 'hero')
   if (!url) return null
 
+  // CSS entrance only on direct load (URL/refresh), not SPA nav (View Transitions handle that)
+  const showEntrance = animate && isDirectLoad
+
   return (
     <div
       ref={ref}
-      className="relative h-screen w-full overflow-hidden"
-      style={transitionName ? { viewTransitionName: transitionName, contain: 'layout' } : undefined}
+      className={`relative h-screen w-full overflow-hidden${showEntrance ? ' hero-entrance' : ''}`}
     >
       <div
         style={{ transform: `translateY(${offsetY}%)` }}

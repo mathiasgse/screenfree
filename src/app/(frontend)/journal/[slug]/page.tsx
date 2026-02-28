@@ -12,7 +12,9 @@ import { RichTextRenderer } from '@/components/RichTextRenderer'
 import { FaqSection } from '@/components/FaqSection'
 import { PlaceCard } from '@/components/PlaceCard'
 import { JsonLd } from '@/components/JsonLd'
+import { ArticleNav } from '@/components/ArticleNav'
 import { BLOG_CATEGORIES } from '@/lib/constants'
+import { extractHeadings, headingConvertersWithIds } from '@/lib/richtext'
 import { getImageUrl, getImageAlt } from '@/lib/media'
 import type { Place, Collection as CollectionType, Region } from '@/payload-types'
 
@@ -55,9 +57,11 @@ export async function generateMetadata({ params }: Args): Promise<Metadata> {
   const post = result.docs[0]
   if (!post) return { title: 'Artikel nicht gefunden' }
 
-  const title = post.seoTitle || post.title
-  const description = post.seoDescription || post.excerpt || `${post.title} — STILL Journal`
+  const meta = post.meta
+  const title = meta?.title || (post as unknown as Record<string, unknown>).seoTitle as string || post.title
+  const description = meta?.description || (post as unknown as Record<string, unknown>).seoDescription as string || post.excerpt || `${post.title} — Stille Orte Journal`
   const heroUrl = getImageUrl(post.heroImage, 'hero')
+  const ogImage = meta?.image && typeof meta.image === 'object' ? getImageUrl(meta.image, 'hero') : heroUrl
 
   return {
     title,
@@ -68,7 +72,7 @@ export async function generateMetadata({ params }: Args): Promise<Metadata> {
       description,
       url: `/journal/${slug}`,
       type: 'article',
-      ...(heroUrl ? { images: [{ url: heroUrl }] } : {}),
+      ...(ogImage ? { images: [{ url: ogImage }] } : {}),
     },
   }
 }
@@ -109,6 +113,9 @@ export default async function BlogPostPage({ params }: Args) {
     answer: f.answer,
   }))
 
+  const headings = post.content ? extractHeadings(post.content) : []
+  const converters = headings.length >= 2 ? headingConvertersWithIds : undefined
+
   return (
     <main>
       {isDraft && (
@@ -131,13 +138,41 @@ export default async function BlogPostPage({ params }: Args) {
           dateModified: post.updatedAt,
           author: {
             '@type': 'Organization',
-            name: 'STILL',
+            name: 'Stille Orte',
           },
           publisher: {
             '@type': 'Organization',
-            name: 'STILL',
+            name: 'Stille Orte',
           },
           url: `${siteUrl}/journal/${slug}`,
+        }}
+      />
+
+      {/* BreadcrumbList JSON-LD */}
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Stille Orte',
+              item: siteUrl,
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: 'Journal',
+              item: `${siteUrl}/journal`,
+            },
+            {
+              '@type': 'ListItem',
+              position: 3,
+              name: post.title,
+              item: `${siteUrl}/journal/${slug}`,
+            },
+          ],
         }}
       />
 
@@ -160,7 +195,7 @@ export default async function BlogPostPage({ params }: Args) {
       )}
 
       {/* Hero */}
-      <ParallaxHero media={post.heroImage} priority transitionName={`blog-hero-${slug}`}>
+      <ParallaxHero media={post.heroImage} priority animate>
         <Container>
           {post.category && (
             <span className="inline-block text-sm tracking-[0.18em] text-white/70 uppercase">
@@ -174,114 +209,123 @@ export default async function BlogPostPage({ params }: Args) {
       </ParallaxHero>
 
       <Container className="py-16 md:py-24">
-        {/* Excerpt */}
-        {post.excerpt && (
-          <ScrollReveal>
-            <div className="mx-auto max-w-3xl">
-              <p className="text-lg leading-relaxed text-stone-600 md:text-xl">
-                {post.excerpt}
-              </p>
+        <div className="relative mx-auto max-w-3xl">
+          {/* Sticky TOC Sidebar — Desktop xl+ only */}
+          {headings.length >= 2 && (
+            <div className="absolute right-full top-0 mr-8 hidden h-full xl:block">
+              <ArticleNav headings={headings} />
             </div>
-          </ScrollReveal>
-        )}
+          )}
 
-        {/* Content */}
-        {post.content && (
-          <ScrollReveal>
-            <div className="mx-auto mt-12 max-w-3xl">
-              <RichTextRenderer data={post.content} />
-            </div>
-          </ScrollReveal>
-        )}
-
-        {/* FAQ */}
-        {faqItems.length > 0 && (
-          <ScrollReveal>
-            <div className="mx-auto mt-16 max-w-3xl">
-              <FaqSection items={faqItems} />
-            </div>
-          </ScrollReveal>
-        )}
-
-        {/* Related Places */}
-        {relatedPlaces.length > 0 && (
-          <ScrollReveal>
-            <div className="mx-auto mt-16 max-w-3xl border-t border-stone-200 pt-10">
-              <p className="mb-6 text-xs font-medium uppercase tracking-widest text-accent">
-                Verknüpfte Orte
-              </p>
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {relatedPlaces.map((place) => (
-                  <PlaceCard key={place.id} place={place} />
-                ))}
+          {/* Excerpt */}
+          {post.excerpt && (
+            <ScrollReveal>
+              <div>
+                <p className="text-lg leading-relaxed text-stone-600 md:text-xl">
+                  {post.excerpt}
+                </p>
               </div>
-            </div>
-          </ScrollReveal>
-        )}
+            </ScrollReveal>
+          )}
 
-        {/* Related Collections */}
-        {relatedCollections.length > 0 && (
-          <ScrollReveal>
-            <div className="mx-auto mt-16 max-w-3xl border-t border-stone-200 pt-10">
-              <p className="mb-6 text-xs font-medium uppercase tracking-widest text-accent">
-                Passende Sammlungen
-              </p>
-              <div className="grid gap-4 sm:grid-cols-3">
-                {relatedCollections.map((col) => (
-                  <Link key={col.id} href={`/sammlungen/${col.slug}`} className="group block">
-                    <div className="relative aspect-[3/2] overflow-hidden rounded-md bg-stone-200">
-                      {getImageUrl(col.heroImage, 'card') && (
-                        <Image
-                          src={getImageUrl(col.heroImage, 'card')!}
-                          alt={getImageAlt(col.heroImage)}
-                          fill
-                          className="object-cover transition-all duration-500 group-hover:scale-[1.03]"
-                          sizes="(max-width: 640px) 100vw, 33vw"
-                          loading="lazy"
-                        />
-                      )}
-                    </div>
-                    <h3 className="mt-2 font-serif text-sm text-stone-700 transition-colors group-hover:text-accent">
-                      {col.title}
-                    </h3>
-                  </Link>
-                ))}
+          {/* Content */}
+          {post.content && (
+            <ScrollReveal>
+              <div className="mt-12">
+                <RichTextRenderer data={post.content} converters={converters} />
               </div>
-            </div>
-          </ScrollReveal>
-        )}
+            </ScrollReveal>
+          )}
 
-        {/* Related Regions */}
-        {relatedRegions.length > 0 && (
-          <ScrollReveal>
-            <div className="mx-auto mt-12 max-w-3xl">
-              <div className="flex flex-wrap gap-2">
-                {relatedRegions.map((region) => (
-                  <Link
-                    key={region.id}
-                    href={`/region/${region.slug}`}
-                    className="rounded-full border border-stone-200 px-4 py-1.5 text-xs tracking-wide text-stone-500 transition-colors hover:border-accent hover:text-accent"
-                  >
-                    {region.title}
-                  </Link>
-                ))}
+          {/* FAQ */}
+          {faqItems.length > 0 && (
+            <ScrollReveal>
+              <div className="mt-16">
+                <FaqSection items={faqItems} />
               </div>
+            </ScrollReveal>
+          )}
+
+          {/* Related Places */}
+          {relatedPlaces.length > 0 && (
+            <ScrollReveal>
+              <div className="mt-16 border-t border-stone-200 pt-10">
+                <p className="mb-6 text-xs font-medium uppercase tracking-widest text-accent">
+                  Verknüpfte Orte
+                </p>
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {relatedPlaces.map((place) => (
+                    <PlaceCard key={place.id} place={place} />
+                  ))}
+                </div>
+              </div>
+            </ScrollReveal>
+          )}
+
+          {/* Related Collections */}
+          {relatedCollections.length > 0 && (
+            <ScrollReveal>
+              <div className="mt-16 border-t border-stone-200 pt-10">
+                <p className="mb-6 text-xs font-medium uppercase tracking-widest text-accent">
+                  Passende Sammlungen
+                </p>
+                <div className="grid gap-4 sm:grid-cols-3">
+                  {relatedCollections.map((col) => (
+                    <Link key={col.id} href={`/sammlungen/${col.slug}`} className="group block">
+                      <div className="relative aspect-[3/2] overflow-hidden rounded-md bg-stone-200">
+                        {getImageUrl(col.heroImage, 'card') && (
+                          <Image
+                            src={getImageUrl(col.heroImage, 'card')!}
+                            alt={getImageAlt(col.heroImage)}
+                            fill
+                            className="object-cover transition-all duration-500 group-hover:scale-[1.03]"
+                            sizes="(max-width: 640px) 100vw, 33vw"
+                            loading="lazy"
+                          />
+                        )}
+                      </div>
+                      <h3 className="mt-2 font-serif text-sm text-stone-700 transition-colors group-hover:text-accent">
+                        {col.title}
+                      </h3>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </ScrollReveal>
+          )}
+
+          {/* Related Regions */}
+          {relatedRegions.length > 0 && (
+            <ScrollReveal>
+              <div className="mt-12">
+                <div className="flex flex-wrap gap-2">
+                  {relatedRegions.map((region) => (
+                    <Link
+                      key={region.id}
+                      href={`/region/${region.slug}`}
+                      className="rounded-full border border-stone-200 px-4 py-1.5 text-xs tracking-wide text-stone-500 transition-colors hover:border-accent hover:text-accent"
+                    >
+                      {region.title}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </ScrollReveal>
+          )}
+
+          {/* Back link */}
+          <ScrollReveal>
+            <div className="mt-16 border-t border-stone-200 pt-10">
+              <Link
+                href="/journal"
+                className="inline-flex items-center gap-2 text-sm tracking-wide text-stone-500 transition-colors hover:text-accent"
+              >
+                <span aria-hidden="true">&larr;</span>
+                Zurück zum Journal
+              </Link>
             </div>
           </ScrollReveal>
-        )}
-
-        {/* Back link */}
-        <ScrollReveal>
-          <div className="mx-auto mt-16 max-w-3xl border-t border-stone-200 pt-10">
-            <Link
-              href="/journal"
-              className="inline-flex items-center gap-2 text-sm tracking-wide text-stone-500 transition-colors hover:text-accent"
-            >
-              <span aria-hidden="true">&larr;</span>
-              Zurück zum Journal
-            </Link>
-          </div>
-        </ScrollReveal>
+        </div>
       </Container>
     </main>
   )

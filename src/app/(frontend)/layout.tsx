@@ -27,12 +27,12 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://still.place'
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'STILL — Kuratierte stille Orte im Alpenraum',
-    template: '%s | STILL',
+    default: 'Stille Orte — Kuratierte stille Orte im Alpenraum',
+    template: '%s | Stille Orte',
   },
   description: 'Eine kuratierte Sammlung der ruhigsten Orte im Alpenraum. Orte, an denen dein Kopf leise wird.',
   openGraph: {
-    siteName: 'STILL',
+    siteName: 'Stille Orte',
     locale: 'de_AT',
     type: 'website',
   },

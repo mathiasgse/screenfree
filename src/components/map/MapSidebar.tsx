@@ -131,7 +131,7 @@ export function MapSidebar({
             >
               {/* Thumbnail */}
               {place.heroImageUrl ? (
-                <div className="relative h-16 w-24 flex-shrink-0 overflow-hidden rounded-lg">
+                <div className="relative h-16 w-24 flex-shrink-0 overflow-hidden rounded-md">
                   <Image
                     src={place.heroImageUrl}
                     alt={place.heroImageAlt}
@@ -141,7 +141,7 @@ export function MapSidebar({
                   />
                 </div>
               ) : (
-                <div className="h-16 w-24 flex-shrink-0 rounded-lg bg-stone-200" />
+                <div className="h-16 w-24 flex-shrink-0 rounded-md bg-stone-200" />
               )}
 
               {/* Content */}
@@ -151,16 +151,9 @@ export function MapSidebar({
                 </h3>
                 <p className="text-sm text-stone-500">{place.region.title}</p>
                 {place.attributes.length > 0 && (
-                  <div className="mt-1 flex flex-wrap gap-1">
-                    {place.attributes.slice(0, 2).map((attr) => (
-                      <span
-                        key={attr}
-                        className="rounded-full border border-stone-200 px-2 py-0.5 text-xs text-stone-500"
-                      >
-                        {attributeLabelMap[attr] ?? attr}
-                      </span>
-                    ))}
-                  </div>
+                  <p className="mt-1 truncate text-xs text-stone-400">
+                    {place.attributes.slice(0, 3).map((attr) => attributeLabelMap[attr] ?? attr).join(' · ')}
+                  </p>
                 )}
               </div>
             </div>

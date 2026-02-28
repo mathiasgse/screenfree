@@ -7,15 +7,27 @@ import { ScrollReveal } from '@/components/ScrollReveal'
 import { StaggerGrid, StaggerItem } from '@/components/StaggerGrid'
 import { BLOG_CATEGORIES } from '@/lib/constants'
 import Link from 'next/link'
-import type { BlogPost } from '@/payload-types'
-
-export const metadata: Metadata = {
-  title: 'Journal — STILL',
-  description: 'Geschichten über stille Orte, Regionen und bewusstes Reisen im Alpenraum.',
-  alternates: { canonical: '/journal' },
-}
+import type { BlogPost, JournalPage as JournalPageType } from '@/payload-types'
 
 export const revalidate = 60
+
+export async function generateMetadata(): Promise<Metadata> {
+  let journalPage: JournalPageType | null = null
+  try {
+    const payload = await getPayload({ config })
+    journalPage = await payload.findGlobal({ slug: 'journal-page' }) as JournalPageType
+  } catch {
+    // Payload unavailable
+  }
+
+  const description = journalPage?.description || 'Geschichten über stille Orte, Regionen und bewusstes Reisen im Alpenraum.'
+
+  return {
+    title: `${journalPage?.heading || 'Journal'} — Stille Orte`,
+    description,
+    alternates: { canonical: '/journal' },
+  }
+}
 
 type Props = {
   searchParams: Promise<{ kategorie?: string }>
@@ -24,20 +36,25 @@ type Props = {
 export default async function JournalPage({ searchParams }: Props) {
   const { kategorie } = await searchParams
   let posts: BlogPost[] = []
+  let journalPage: JournalPageType | null = null
 
   try {
     const payload = await getPayload({ config })
-    const result = await payload.find({
-      collection: 'blog-posts',
-      where: {
-        _status: { equals: 'published' },
-        ...(kategorie ? { category: { equals: kategorie } } : {}),
-      },
-      sort: '-createdAt',
-      limit: 50,
-      depth: 1,
-    })
+    const [result, journalPageResult] = await Promise.all([
+      payload.find({
+        collection: 'blog-posts',
+        where: {
+          _status: { equals: 'published' },
+          ...(kategorie ? { category: { equals: kategorie } } : {}),
+        },
+        sort: '-createdAt',
+        limit: 50,
+        depth: 1,
+      }),
+      payload.findGlobal({ slug: 'journal-page' }),
+    ])
     posts = result.docs as BlogPost[]
+    journalPage = journalPageResult as JournalPageType
   } catch {
     // Payload unavailable
   }
@@ -49,12 +66,12 @@ export default async function JournalPage({ searchParams }: Props) {
     <main className="pt-32 pb-20 md:pt-40 md:pb-28">
       <Container>
         <ScrollReveal>
-          <p className="text-xs font-medium uppercase tracking-widest text-accent">Journal</p>
+          <p className="text-xs font-medium uppercase tracking-widest text-accent">{journalPage?.label ?? 'Journal'}</p>
           <h1 className="heading-accent mt-3 font-serif text-4xl sm:text-5xl md:text-6xl">
-            STILL Journal
+            {journalPage?.heading ?? 'Stille Orte Journal'}
           </h1>
           <p className="mt-4 max-w-xl text-lg text-stone-500">
-            Geschichten über stille Orte, Regionen und bewusstes Reisen.
+            {journalPage?.description ?? 'Geschichten über stille Orte, Regionen und bewusstes Reisen.'}
           </p>
         </ScrollReveal>
 

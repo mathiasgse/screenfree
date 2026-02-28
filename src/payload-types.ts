@@ -73,6 +73,9 @@ export interface Config {
     collections: Collection;
     regions: Region;
     'blog-posts': BlogPost;
+    'candidate-places': CandidatePlace;
+    'discovery-runs': DiscoveryRun;
+    'booking-inquiries': BookingInquiry;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -86,6 +89,9 @@ export interface Config {
     collections: CollectionsSelect<false> | CollectionsSelect<true>;
     regions: RegionsSelect<false> | RegionsSelect<true>;
     'blog-posts': BlogPostsSelect<false> | BlogPostsSelect<true>;
+    'candidate-places': CandidatePlacesSelect<false> | CandidatePlacesSelect<true>;
+    'discovery-runs': DiscoveryRunsSelect<false> | DiscoveryRunsSelect<true>;
+    'booking-inquiries': BookingInquiriesSelect<false> | BookingInquiriesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -97,9 +103,15 @@ export interface Config {
   fallbackLocale: null;
   globals: {
     homepage: Homepage;
+    about: About;
+    'journal-page': JournalPage;
+    'sammlungen-page': SammlungenPage;
   };
   globalsSelect: {
     homepage: HomepageSelect<false> | HomepageSelect<true>;
+    about: AboutSelect<false> | AboutSelect<true>;
+    'journal-page': JournalPageSelect<false> | JournalPageSelect<true>;
+    'sammlungen-page': SammlungenPageSelect<false> | SammlungenPageSelect<true>;
   };
   locale: null;
   user: User;
@@ -239,6 +251,31 @@ export interface Place {
   attributes?:
     | ('funkloch' | 'see' | 'berge' | 'wald' | 'design' | 'adults-only' | 'eco' | 'retreat' | 'chalet' | 'boutique')[]
     | null;
+  /**
+   * Zielgruppe auswählen
+   */
+  audience?: ('reset' | 'paare' | 'solo' | 'offsite' | 'hund')[] | null;
+  /**
+   * 1 = Ruhig, 2 = Sehr ruhig, 3 = Absolut still
+   */
+  quietnessLevel?: ('1' | '2' | '3') | null;
+  /**
+   * Konkrete Merkmale, die den Ort ruhig machen
+   */
+  quietnessTraits?:
+    | (
+        | 'no-road-noise'
+        | 'small-house'
+        | 'no-cell-signal'
+        | 'adults-only'
+        | 'no-wifi'
+        | 'nature-only'
+        | 'secluded'
+        | 'no-tv'
+        | 'digital-detox'
+        | 'silent-zones'
+      )[]
+    | null;
   priceRange?: ('budget' | 'mid' | 'premium' | 'luxury') | null;
   heroImage: string | Media;
   gallery?: (string | Media)[] | null;
@@ -246,6 +283,26 @@ export interface Place {
    * Link zur offiziellen Website
    */
   outboundUrl?: string | null;
+  /**
+   * Wird für Buchungsanfragen verwendet — nie öffentlich sichtbar
+   */
+  contactEmail?: string | null;
+  /**
+   * Optional — Standard: "Warum hier abschalten"
+   */
+  whyDisconnectHeading?: string | null;
+  /**
+   * Optional — Standard: "Website besuchen"
+   */
+  ctaLabel?: string | null;
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (string | null) | Media;
+  };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -259,6 +316,15 @@ export interface Region {
   title: string;
   slug: string;
   intro?: string | null;
+  heroImage?: (string | null) | Media;
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (string | null) | Media;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -271,13 +337,49 @@ export interface Collection {
   title: string;
   slug: string;
   intro?: string | null;
+  /**
+   * 4–6 Sätze für Listings und SEO
+   */
+  excerpt?: string | null;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   heroImage?: (string | null) | Media;
   /**
    * Kuratierte Auswahl von Orten (Reihenfolge beachten)
    */
   places?: (string | Place)[] | null;
+  faq?:
+    | {
+        question: string;
+        answer: string;
+        id?: string | null;
+      }[]
+    | null;
+  relatedCollections?: (string | Collection)[] | null;
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (string | null) | Media;
+  };
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -316,14 +418,6 @@ export interface BlogPost {
       }[]
     | null;
   /**
-   * Überschreibt den <title>-Tag
-   */
-  seoTitle?: string | null;
-  /**
-   * Überschreibt die Meta-Description
-   */
-  seoDescription?: string | null;
-  /**
    * 2–8 Orte verknüpfen
    */
   relatedPlaces?: (string | Place)[] | null;
@@ -333,9 +427,142 @@ export interface BlogPost {
    * Freie Tags für Filterung und SEO
    */
   tags?: string[] | null;
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (string | null) | Media;
+  };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "candidate-places".
+ */
+export interface CandidatePlace {
+  id: string;
+  name: string;
+  websiteUrl: string;
+  mapsUrl?: string | null;
+  contactEmail?: string | null;
+  snippet?: string | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  coordinates?: [number, number] | null;
+  regionGuess?: string | null;
+  source?: string | null;
+  qualityScore?: number | null;
+  reasons?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  riskFlags?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  confidence?: number | null;
+  ratingValue?: number | null;
+  reviewCount?: number | null;
+  status?: ('new' | 'maybe' | 'accepted' | 'rejected') | null;
+  rejectionReason?: string | null;
+  /**
+   * Auto-generiert bei Acceptance
+   */
+  generatedEmail?: string | null;
+  calibrationLabel?: ('perfect' | 'good' | 'borderline' | 'wrong') | null;
+  needsManualCheck?: boolean | null;
+  dedupeKey: string;
+  discoveryRunId?: (string | null) | DiscoveryRun;
+  acceptedPlaceId?: (string | null) | Place;
+  images?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Original SERP + enrichment data
+   */
+  rawData?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "discovery-runs".
+ */
+export interface DiscoveryRun {
+  id: string;
+  preset?: string | null;
+  query?: string | null;
+  region?: string | null;
+  startedAt?: string | null;
+  completedAt?: string | null;
+  status?: ('running' | 'completed' | 'failed') | null;
+  stats?: {
+    candidatesFound?: number | null;
+    newCandidates?: number | null;
+    duplicatesSkipped?: number | null;
+    errors?: number | null;
+  };
+  progress?: {
+    phase?: ('searching' | 'processing' | 'finalizing') | null;
+    processed?: number | null;
+    total?: number | null;
+  };
+  errorMessage?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "booking-inquiries".
+ */
+export interface BookingInquiry {
+  id: string;
+  name: string;
+  email: string;
+  message: string;
+  checkIn?: string | null;
+  checkOut?: string | null;
+  place: string | Place;
+  /**
+   * Denormalisierter Ortstitel zum Zeitpunkt der Anfrage
+   */
+  placeTitle?: string | null;
+  /**
+   * Ob die E-Mail-Benachrichtigung erfolgreich versendet wurde
+   */
+  emailSent?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -384,6 +611,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'blog-posts';
         value: string | BlogPost;
+      } | null)
+    | ({
+        relationTo: 'candidate-places';
+        value: string | CandidatePlace;
+      } | null)
+    | ({
+        relationTo: 'discovery-runs';
+        value: string | DiscoveryRun;
+      } | null)
+    | ({
+        relationTo: 'booking-inquiries';
+        value: string | BookingInquiry;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -518,10 +757,23 @@ export interface PlacesSelect<T extends boolean = true> {
         id?: T;
       };
   attributes?: T;
+  audience?: T;
+  quietnessLevel?: T;
+  quietnessTraits?: T;
   priceRange?: T;
   heroImage?: T;
   gallery?: T;
   outboundUrl?: T;
+  contactEmail?: T;
+  whyDisconnectHeading?: T;
+  ctaLabel?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -534,10 +786,28 @@ export interface CollectionsSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   intro?: T;
+  excerpt?: T;
+  content?: T;
   heroImage?: T;
   places?: T;
+  faq?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  relatedCollections?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -547,6 +817,14 @@ export interface RegionsSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   intro?: T;
+  heroImage?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -568,15 +846,98 @@ export interface BlogPostsSelect<T extends boolean = true> {
         answer?: T;
         id?: T;
       };
-  seoTitle?: T;
-  seoDescription?: T;
   relatedPlaces?: T;
   relatedCollections?: T;
   relatedRegions?: T;
   tags?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "candidate-places_select".
+ */
+export interface CandidatePlacesSelect<T extends boolean = true> {
+  name?: T;
+  websiteUrl?: T;
+  mapsUrl?: T;
+  contactEmail?: T;
+  snippet?: T;
+  coordinates?: T;
+  regionGuess?: T;
+  source?: T;
+  qualityScore?: T;
+  reasons?: T;
+  riskFlags?: T;
+  confidence?: T;
+  ratingValue?: T;
+  reviewCount?: T;
+  status?: T;
+  rejectionReason?: T;
+  generatedEmail?: T;
+  calibrationLabel?: T;
+  needsManualCheck?: T;
+  dedupeKey?: T;
+  discoveryRunId?: T;
+  acceptedPlaceId?: T;
+  images?: T;
+  rawData?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "discovery-runs_select".
+ */
+export interface DiscoveryRunsSelect<T extends boolean = true> {
+  preset?: T;
+  query?: T;
+  region?: T;
+  startedAt?: T;
+  completedAt?: T;
+  status?: T;
+  stats?:
+    | T
+    | {
+        candidatesFound?: T;
+        newCandidates?: T;
+        duplicatesSkipped?: T;
+        errors?: T;
+      };
+  progress?:
+    | T
+    | {
+        phase?: T;
+        processed?: T;
+        total?: T;
+      };
+  errorMessage?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "booking-inquiries_select".
+ */
+export interface BookingInquiriesSelect<T extends boolean = true> {
+  name?: T;
+  email?: T;
+  message?: T;
+  checkIn?: T;
+  checkOut?: T;
+  place?: T;
+  placeTitle?: T;
+  emailSent?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -634,9 +995,69 @@ export interface Homepage {
   placesCTALabel?: string | null;
   collectionsLabel?: string | null;
   collectionsHeading?: string | null;
+  journalLabel?: string | null;
+  journalHeading?: string | null;
+  journalCTALabel?: string | null;
+  trustOrteLabel?: string | null;
+  trustRegionenLabel?: string | null;
+  trustSammlungenLabel?: string | null;
+  regionEmptyMessage?: string | null;
+  mapHeading?: string | null;
+  mapSubheading?: string | null;
+  mapCTALabel?: string | null;
+  newsletterHeading?: string | null;
   introText: string;
   atmosphereImage?: (string | null) | Media;
   atmosphereText?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "about".
+ */
+export interface About {
+  id: string;
+  heading?: string | null;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  seoDescription?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "journal-page".
+ */
+export interface JournalPage {
+  id: string;
+  label?: string | null;
+  heading?: string | null;
+  description?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sammlungen-page".
+ */
+export interface SammlungenPage {
+  id: string;
+  heading?: string | null;
+  description?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -655,9 +1076,55 @@ export interface HomepageSelect<T extends boolean = true> {
   placesCTALabel?: T;
   collectionsLabel?: T;
   collectionsHeading?: T;
+  journalLabel?: T;
+  journalHeading?: T;
+  journalCTALabel?: T;
+  trustOrteLabel?: T;
+  trustRegionenLabel?: T;
+  trustSammlungenLabel?: T;
+  regionEmptyMessage?: T;
+  mapHeading?: T;
+  mapSubheading?: T;
+  mapCTALabel?: T;
+  newsletterHeading?: T;
   introText?: T;
   atmosphereImage?: T;
   atmosphereText?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "about_select".
+ */
+export interface AboutSelect<T extends boolean = true> {
+  heading?: T;
+  content?: T;
+  seoDescription?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "journal-page_select".
+ */
+export interface JournalPageSelect<T extends boolean = true> {
+  label?: T;
+  heading?: T;
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sammlungen-page_select".
+ */
+export interface SammlungenPageSelect<T extends boolean = true> {
+  heading?: T;
+  description?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

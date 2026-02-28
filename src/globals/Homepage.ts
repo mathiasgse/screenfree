@@ -75,6 +75,82 @@ export const Homepage: GlobalConfig = {
               label: 'Sammlungen — Überschrift',
               defaultValue: 'Sammlungen',
             },
+            {
+              name: 'journalLabel',
+              type: 'text',
+              label: 'Journal — Label',
+              defaultValue: 'Journal',
+            },
+            {
+              name: 'journalHeading',
+              type: 'text',
+              label: 'Journal — Überschrift',
+              defaultValue: 'Aus dem Journal',
+            },
+            {
+              name: 'journalCTALabel',
+              type: 'text',
+              label: 'Journal — CTA Text',
+              defaultValue: 'Zum Journal',
+            },
+            {
+              name: 'trustOrteLabel',
+              type: 'text',
+              label: 'Trust-Metrik — Orte',
+              defaultValue: 'handverlesene Orte',
+            },
+            {
+              name: 'trustRegionenLabel',
+              type: 'text',
+              label: 'Trust-Metrik — Regionen',
+              defaultValue: 'Regionen',
+            },
+            {
+              name: 'trustSammlungenLabel',
+              type: 'text',
+              label: 'Trust-Metrik — Sammlungen',
+              defaultValue: 'Sammlungen',
+            },
+            {
+              name: 'regionEmptyMessage',
+              type: 'text',
+              label: 'Region — Leere Nachricht',
+              defaultValue: 'Bald mehr Orte in dieser Region.',
+            },
+          ],
+        },
+        {
+          label: 'Karte',
+          fields: [
+            {
+              name: 'mapHeading',
+              type: 'text',
+              label: 'Karte — Überschrift',
+              defaultValue: 'Stille Orte, verteilt im Alpenraum.',
+            },
+            {
+              name: 'mapSubheading',
+              type: 'text',
+              label: 'Karte — Unterzeile',
+              defaultValue: 'Manchmal hilft es, sie zu sehen.',
+            },
+            {
+              name: 'mapCTALabel',
+              type: 'text',
+              label: 'Karte — CTA Text',
+              defaultValue: 'Karte entdecken',
+            },
+          ],
+        },
+        {
+          label: 'Newsletter',
+          fields: [
+            {
+              name: 'newsletterHeading',
+              type: 'text',
+              label: 'Newsletter — Überschrift',
+              defaultValue: 'Neue stille Orte, direkt in deinem Postfach.',
+            },
           ],
         },
         {

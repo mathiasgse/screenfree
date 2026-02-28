@@ -2,11 +2,14 @@ import Image from 'next/image'
 import { Link } from 'next-view-transitions'
 import { getImageUrl, getImageAlt } from '@/lib/media'
 import { PriceRange } from './PriceRange'
-import { ATTRIBUTE_OPTIONS } from '@/lib/constants'
+import { ATTRIBUTE_OPTIONS, AUDIENCE_OPTIONS, QUIETNESS_LEVELS } from '@/lib/constants'
 import type { Place } from '@/payload-types'
 
 const attrLabel = (val: string) =>
   ATTRIBUTE_OPTIONS.find((o) => o.value === val)?.label ?? val
+
+const audLabel = (val: string) =>
+  AUDIENCE_OPTIONS.find((o) => o.value === val)?.label ?? val
 
 export function PlaceCard({
   place,
@@ -23,8 +26,7 @@ export function PlaceCard({
     return (
       <Link href={`/orte/${place.slug}`} className="group flex h-full flex-col">
         <div
-          className="relative min-h-[350px] flex-1 overflow-hidden rounded-md bg-stone-200"
-          style={{ viewTransitionName: `place-hero-${place.slug}`, contain: 'layout' }}
+          className="relative min-h-[350px] flex-1 overflow-hidden rounded-md bg-stone-200 ring-1 ring-inset ring-black/5"
         >
           {imageUrl && (
             <Image
@@ -36,6 +38,50 @@ export function PlaceCard({
             />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/5 to-transparent transition-opacity duration-500" />
+          {/* Hover overlay */}
+          <div className="absolute inset-0 flex flex-col justify-end pb-28 pl-6 pr-6 opacity-0 transition-opacity duration-300 group-hover:opacity-100 md:pb-32 md:pl-8 md:pr-8">
+            {/* Quietness bars */}
+            {place.quietnessLevel && (
+              <div className="flex items-center gap-2">
+                <div className="flex gap-0.5">
+                  {[1, 2, 3].map((i) => (
+                    <span
+                      key={i}
+                      className={`h-2 w-3 ${
+                        i <= Number(place.quietnessLevel)
+                          ? 'bg-accent'
+                          : 'border border-white/30 bg-transparent'
+                      }`}
+                    />
+                  ))}
+                </div>
+                <span className="text-xs font-medium text-white/90">
+                  {QUIETNESS_LEVELS.find((l) => l.value === Number(place.quietnessLevel))?.label}
+                </span>
+              </div>
+            )}
+
+            {/* All attributes */}
+            {place.attributes && place.attributes.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-1">
+                {place.attributes.map((attr) => (
+                  <span
+                    key={attr}
+                    className="rounded-full border border-white/20 px-2 py-0.5 text-[10px] text-white/80"
+                  >
+                    {attrLabel(attr)}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Audience */}
+            {place.audience && place.audience.length > 0 && (
+              <p className="mt-1.5 text-[10px] text-white/60">
+                {place.audience.map((a) => audLabel(a)).join(' · ')}
+              </p>
+            )}
+          </div>
           <div className="absolute inset-x-0 bottom-0 translate-y-2 p-6 transition-transform duration-500 group-hover:translate-y-0 md:p-8">
             <div className="mb-3 h-[2px] w-8 bg-accent" />
             <h3 className="font-serif text-2xl text-white md:text-3xl">{place.title}</h3>
@@ -66,8 +112,7 @@ export function PlaceCard({
   return (
     <Link href={`/orte/${place.slug}`} className="group block">
       <div
-        className="relative aspect-[3/2] overflow-hidden rounded-md bg-stone-200"
-        style={{ viewTransitionName: `place-hero-${place.slug}`, contain: 'layout' }}
+        className="relative aspect-[3/2] overflow-hidden rounded-md bg-stone-200 ring-1 ring-inset ring-black/5 shadow-sm transition-shadow duration-500 group-hover:shadow-md"
       >
         {imageUrl && (
           <Image
@@ -78,7 +123,50 @@ export function PlaceCard({
             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         )}
-        <div className="absolute inset-0 bg-black/0 transition-all duration-500 group-hover:bg-black/10" />
+        {/* Hover overlay */}
+        <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/60 via-black/30 to-transparent p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+          {/* Quietness bars */}
+          {place.quietnessLevel && (
+            <div className="flex items-center gap-2">
+              <div className="flex gap-0.5">
+                {[1, 2, 3].map((i) => (
+                  <span
+                    key={i}
+                    className={`h-2 w-3 ${
+                      i <= Number(place.quietnessLevel)
+                        ? 'bg-accent'
+                        : 'border border-white/30 bg-transparent'
+                    }`}
+                  />
+                ))}
+              </div>
+              <span className="text-xs font-medium text-white/90">
+                {QUIETNESS_LEVELS.find((l) => l.value === Number(place.quietnessLevel))?.label}
+              </span>
+            </div>
+          )}
+
+          {/* All attributes */}
+          {place.attributes && place.attributes.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1">
+              {place.attributes.map((attr) => (
+                <span
+                  key={attr}
+                  className="rounded-full border border-white/20 px-2 py-0.5 text-[10px] text-white/80"
+                >
+                  {attrLabel(attr)}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Audience */}
+          {place.audience && place.audience.length > 0 && (
+            <p className="mt-1.5 text-[10px] text-white/60">
+              {place.audience.map((a) => audLabel(a)).join(' · ')}
+            </p>
+          )}
+        </div>
       </div>
       <div className="mt-3">
         <h3 className="font-serif text-lg text-stone-900 transition-colors group-hover:text-accent">{place.title}</h3>

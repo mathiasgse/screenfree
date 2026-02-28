@@ -85,24 +85,6 @@ export const BlogPosts: CollectionConfig = {
       ],
     },
     {
-      name: 'seoTitle',
-      type: 'text',
-      label: 'SEO-Titel',
-      admin: {
-        position: 'sidebar',
-        description: 'Überschreibt den <title>-Tag',
-      },
-    },
-    {
-      name: 'seoDescription',
-      type: 'textarea',
-      label: 'SEO-Description',
-      admin: {
-        position: 'sidebar',
-        description: 'Überschreibt die Meta-Description',
-      },
-    },
-    {
       name: 'relatedPlaces',
       type: 'relationship',
       relationTo: 'places',

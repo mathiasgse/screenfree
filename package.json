@@ -10,24 +10,32 @@
     "start": "next start",
     "lint": "next lint",
     "generate:types": "payload generate:types",
-    "generate:importmap": "payload generate:importmap"
+    "generate:importmap": "payload generate:importmap",
+    "discovery:run": "tsx src/discovery/worker/cli.ts",
+    "discovery:dry-run": "tsx src/discovery/worker/cli.ts --dry-run"
   },
   "dependencies": {
     "@payloadcms/db-mongodb": "^3.77.0",
     "@payloadcms/next": "^3.77.0",
+    "@payloadcms/plugin-seo": "^3.77.0",
     "@payloadcms/richtext-lexical": "^3.77.0",
     "@payloadcms/storage-vercel-blob": "^3.77.0",
     "@payloadcms/ui": "^3.77.0",
     "@tailwindcss/typography": "^0.5.19",
     "@vis.gl/react-mapbox": "^8.1.0",
+    "date-fns": "^4.1.0",
     "graphql": "^16.12.0",
     "mapbox-gl": "^3.18.1",
+    "motion": "^12.34.3",
     "next": "^15.4.11",
     "next-view-transitions": "^0.3.5",
+    "openai": "^4.73.0",
     "payload": "^3.77.0",
     "react": "^19.2.4",
+    "react-day-picker": "^9",
     "react-dom": "^19.2.4",
     "react-map-gl": "^8.1.0",
+    "resend": "^6.9.2",
     "sharp": "^0.34.5"
   },
   "devDependencies": {
@@ -41,6 +49,7 @@
     "eslint-config-next": "^15.4.11",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.2.0",
+    "tsx": "^4.19.0",
     "typescript": "^5.9.3"
   }
 }

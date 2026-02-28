@@ -18,7 +18,7 @@ import { BlogCard } from '@/components/BlogCard'
 import type { Place, Collection as CollectionType, Homepage, Region, BlogPost } from '@/payload-types'
 
 export const metadata: Metadata = {
-  title: 'STILL — Kuratierte stille Orte im Alpenraum',
+  title: 'Stille Orte — Kuratierte stille Orte im Alpenraum',
   alternates: { canonical: '/' },
 }
 
@@ -44,6 +44,7 @@ export default async function HomePage() {
       }),
       payload.find({
         collection: 'collections',
+        where: { _status: { equals: 'published' } },
         limit: 6,
         depth: 2,
       }),
@@ -80,7 +81,7 @@ export default async function HomePage() {
         data={{
           '@context': 'https://schema.org',
           '@type': 'WebSite',
-          name: 'STILL',
+          name: 'Stille Orte',
           url: process.env.NEXT_PUBLIC_SITE_URL || 'https://still.place',
           description: 'Eine kuratierte Sammlung der ruhigsten Orte im Alpenraum.',
         }}
@@ -97,6 +98,9 @@ export default async function HomePage() {
         regions={regions.map((r) => ({ title: r.title, slug: r.slug }))}
         collections={collections.map((c) => ({ title: c.title, slug: c.slug }))}
         counts={{ places: totalPlaces, regions: regions.length, collections: collections.length }}
+        trustOrteLabel={homepage?.trustOrteLabel ?? undefined}
+        trustRegionenLabel={homepage?.trustRegionenLabel ?? undefined}
+        trustSammlungenLabel={homepage?.trustSammlungenLabel ?? undefined}
       />
 
       {/* Intro */}
@@ -159,9 +163,10 @@ export default async function HomePage() {
             <ScrollReveal className="mt-12 text-center">
               <Link
                 href="/orte"
-                className="inline-block h-12 rounded-full border border-stone-200 px-8 text-sm font-medium leading-[3rem] tracking-wide text-stone-700 transition-all duration-300 hover:bg-stone-100"
+                className="group inline-flex items-center gap-3 rounded-sm bg-accent-dark px-8 py-4 text-sm tracking-wide text-white transition-all duration-300 hover:bg-accent"
               >
                 {homepage?.placesCTALabel ?? 'Alle Orte entdecken'}
+                <span className="inline-block transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true">&rarr;</span>
               </Link>
             </ScrollReveal>
           </Container>
@@ -174,6 +179,9 @@ export default async function HomePage() {
           coordinates={places
             .filter((p) => p.coordinates)
             .map((p) => p.coordinates as [number, number])}
+          heading={homepage?.mapHeading ?? undefined}
+          subheading={homepage?.mapSubheading ?? undefined}
+          ctaLabel={homepage?.mapCTALabel ?? undefined}
         />
       </ScrollReveal>
 
@@ -205,7 +213,7 @@ export default async function HomePage() {
                       className="group flex-shrink-0 snap-start"
                       style={{ width: 'min(340px, 80vw)' }}
                     >
-                      <div className="relative aspect-[3/4] overflow-hidden rounded-md bg-stone-200">
+                      <div className="relative aspect-[3/4] overflow-hidden rounded-md bg-stone-200 ring-1 ring-inset ring-black/5">
                         {imageUrl && (
                           <Image
                             src={imageUrl}
@@ -215,16 +223,15 @@ export default async function HomePage() {
                             sizes="340px"
                           />
                         )}
-                        <div className="absolute inset-0 bg-black/0 transition-all duration-500 group-hover:bg-black/10" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent transition-opacity duration-500" />
+                        <div className="absolute inset-x-0 bottom-0 translate-y-2 p-6 transition-transform duration-500 group-hover:translate-y-0">
+                          <div className="mb-3 h-[2px] w-0 bg-white/70 transition-all duration-500 group-hover:w-8" />
+                          <h3 className="font-serif text-xl text-white">{collection.title}</h3>
+                          {collection.intro && (
+                            <p className="mt-1.5 text-sm text-white/70 line-clamp-2">{collection.intro}</p>
+                          )}
+                        </div>
                       </div>
-                      <h3 className="mt-3 font-serif text-lg text-stone-900">
-                        {collection.title}
-                      </h3>
-                      {collection.intro && (
-                        <p className="mt-1 text-sm text-stone-500 line-clamp-2">
-                          {collection.intro}
-                        </p>
-                      )}
                     </Link>
                   )
                 })}
@@ -239,9 +246,9 @@ export default async function HomePage() {
         <section className="py-20 md:py-28">
           <Container>
             <ScrollReveal>
-              <p className="text-xs font-medium uppercase tracking-widest text-accent">Journal</p>
+              <p className="text-xs font-medium uppercase tracking-widest text-accent">{homepage?.journalLabel ?? 'Journal'}</p>
               <h2 className="heading-accent mt-3 font-serif text-3xl sm:text-4xl md:text-5xl">
-                Aus dem Journal
+                {homepage?.journalHeading ?? 'Aus dem Journal'}
               </h2>
             </ScrollReveal>
 
@@ -256,9 +263,10 @@ export default async function HomePage() {
             <ScrollReveal className="mt-12 text-center">
               <Link
                 href="/journal"
-                className="inline-block h-12 rounded-full border border-stone-200 px-8 text-sm font-medium leading-[3rem] tracking-wide text-stone-700 transition-all duration-300 hover:bg-stone-100"
+                className="group inline-flex items-center gap-3 rounded-sm bg-accent-dark px-8 py-4 text-sm tracking-wide text-white transition-all duration-300 hover:bg-accent"
               >
-                Zum Journal
+                {homepage?.journalCTALabel ?? 'Zum Journal'}
+                <span className="inline-block transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true">&rarr;</span>
               </Link>
             </ScrollReveal>
           </Container>
@@ -275,7 +283,7 @@ export default async function HomePage() {
 
       {/* Newsletter */}
       <ScrollReveal>
-        <NewsletterSignup />
+        <NewsletterSignup heading={homepage?.newsletterHeading ?? undefined} />
       </ScrollReveal>
     </main>
   )

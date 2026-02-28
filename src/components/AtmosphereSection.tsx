@@ -27,7 +27,7 @@ export function AtmosphereSection({ media, text }: AtmosphereSectionProps) {
       {text && (
         <div className="absolute inset-0 flex items-center justify-center px-6">
           <p
-            className={`text-center font-serif text-2xl md:text-4xl lg:text-5xl ${
+            className={`max-w-3xl text-center font-serif text-2xl italic leading-tight md:text-4xl lg:text-5xl ${
               imageUrl ? 'text-white' : 'text-stone-600'
             }`}
           >

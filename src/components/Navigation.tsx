@@ -166,7 +166,7 @@ export function Navigation() {
                 scrolled ? 'text-lg' : 'text-xl'
               } ${isTransparent ? 'text-white' : 'text-stone-900'}`}
             >
-              STILL
+              Stille Orte
             </Link>
 
             {/* Right links */}
@@ -191,7 +191,7 @@ export function Navigation() {
                 scrolled ? 'text-lg' : 'text-xl'
               } ${isTransparent ? 'text-white' : 'text-stone-900'}`}
             >
-              STILL
+              Stille Orte
             </Link>
 
             <button
@@ -249,7 +249,7 @@ export function Navigation() {
                 onClick={triggerClose}
                 className="font-serif text-xl tracking-[0.2em] text-stone-100"
               >
-                STILL
+                Stille Orte
               </Link>
 
               <button

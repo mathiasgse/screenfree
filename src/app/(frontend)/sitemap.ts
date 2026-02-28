@@ -24,6 +24,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.3,
     },
+    {
+      url: `${SITE_URL}/orte`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    {
+      url: `${SITE_URL}/sammlungen`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    {
+      url: `${SITE_URL}/journal`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    },
   ]
 
   try {
@@ -37,6 +55,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }),
       payload.find({
         collection: 'collections',
+        where: { _status: { equals: 'published' } },
         limit: 1000,
       }),
       payload.find({
@@ -64,7 +83,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         url: `${SITE_URL}/sammlungen/${collection.slug}`,
         lastModified: collection.updatedAt ? new Date(collection.updatedAt) : new Date(),
         changeFrequency: 'weekly',
-        priority: 0.7,
+        priority: 0.8,
       })
     }
 

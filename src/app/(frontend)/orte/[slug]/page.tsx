@@ -9,10 +9,13 @@ import { Container } from '@/components/Container'
 import { ParallaxHero } from '@/components/ParallaxHero'
 import { ScrollReveal } from '@/components/ScrollReveal'
 import { AttributeTag } from '@/components/AttributeTag'
+import { AudienceTag } from '@/components/AudienceTag'
 import { PriceRange } from '@/components/PriceRange'
 import { RichTextRenderer } from '@/components/RichTextRenderer'
 import { getImageUrl, getImageAlt } from '@/lib/media'
 import { JsonLd } from '@/components/JsonLd'
+import { QuietnessProfile } from '@/components/QuietnessProfile'
+import { PlaceCTA } from '@/components/PlaceCTA'
 import type { Region } from '@/payload-types'
 
 type Args = {
@@ -54,18 +57,21 @@ export async function generateMetadata({ params }: Args): Promise<Metadata> {
   const region = typeof place.region === 'object' ? (place.region as Region) : null
   const heroUrl = getImageUrl(place.heroImage, 'hero')
 
-  const description = `${place.title}${region ? ` in ${region.title}` : ''} — Ein ruhiger Ort im Alpenraum.`
+  const meta = place.meta
+  const title = meta?.title || (place as unknown as Record<string, unknown>).seoTitle as string || place.title
+  const description = meta?.description || (place as unknown as Record<string, unknown>).seoDescription as string || `${place.title}${region ? ` in ${region.title}` : ''} — Ein ruhiger Ort im Alpenraum.`
+  const ogImage = meta?.image && typeof meta.image === 'object' ? getImageUrl(meta.image, 'hero') : heroUrl
 
   return {
-    title: place.title,
+    title,
     description,
     alternates: { canonical: `/orte/${slug}` },
     openGraph: {
-      title: place.title,
+      title,
       description,
       url: `/orte/${slug}`,
       type: 'article',
-      ...(heroUrl ? { images: [{ url: heroUrl }] } : {}),
+      ...(ogImage ? { images: [{ url: ogImage }] } : {}),
     },
   }
 }
@@ -92,7 +98,10 @@ export default async function PlacePage({ params }: Args) {
 
   const collectionsResult = await payload.find({
     collection: 'collections',
-    where: { places: { contains: place.id } },
+    where: {
+      places: { contains: place.id },
+      _status: { equals: 'published' },
+    },
     limit: 3,
     depth: 1,
   })
@@ -104,6 +113,8 @@ export default async function PlacePage({ params }: Args) {
     premium: '\u20AC\u20AC\u20AC',
     luxury: '\u20AC\u20AC\u20AC\u20AC',
   }
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://still.place'
 
   return (
     <main>
@@ -121,16 +132,57 @@ export default async function PlacePage({ params }: Args) {
           '@context': 'https://schema.org',
           '@type': 'LodgingBusiness',
           name: place.title,
-          url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://still.place'}/orte/${slug}`,
+          url: `${siteUrl}/orte/${slug}`,
           ...(getImageUrl(place.heroImage, 'hero') ? { image: getImageUrl(place.heroImage, 'hero') } : {}),
           ...(place.outboundUrl ? { sameAs: place.outboundUrl } : {}),
           ...(region ? { address: { '@type': 'PostalAddress', addressRegion: region.title } } : {}),
+          ...(place.coordinates ? {
+            geo: {
+              '@type': 'GeoCoordinates',
+              longitude: place.coordinates[0],
+              latitude: place.coordinates[1],
+            },
+          } : {}),
           ...(place.priceRange ? { priceRange: priceSymbols[place.priceRange] || '' } : {}),
         }}
       />
 
+      {/* BreadcrumbList JSON-LD */}
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Stille Orte',
+              item: siteUrl,
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: 'Orte',
+              item: `${siteUrl}/orte`,
+            },
+            ...(region ? [{
+              '@type': 'ListItem',
+              position: 3,
+              name: region.title,
+              item: `${siteUrl}/region/${region.slug}`,
+            }] : []),
+            {
+              '@type': 'ListItem',
+              position: region ? 4 : 3,
+              name: place.title,
+              item: `${siteUrl}/orte/${slug}`,
+            },
+          ],
+        }}
+      />
+
       {/* Full-Viewport Hero */}
-      <ParallaxHero media={place.heroImage} priority transitionName={`place-hero-${slug}`}>
+      <ParallaxHero media={place.heroImage} priority animate>
         <Container>
           {region && (
             <Link
@@ -147,6 +199,20 @@ export default async function PlacePage({ params }: Args) {
       </ParallaxHero>
 
       <Container className="py-16 md:py-24">
+        {/* Quietness profile */}
+        {place.quietnessLevel && (
+          <ScrollReveal>
+            <div className="mx-auto mb-12 max-w-3xl">
+              <QuietnessProfile
+                level={Number(place.quietnessLevel)}
+                traits={place.quietnessTraits ?? []}
+                priceRange={place.priceRange ?? null}
+                size="large"
+              />
+            </div>
+          </ScrollReveal>
+        )}
+
         {/* Short Story with Pull Quote */}
         {place.shortStory && (
           <ScrollReveal>
@@ -162,7 +228,7 @@ export default async function PlacePage({ params }: Args) {
         {place.whyDisconnect && place.whyDisconnect.length > 0 && (
           <ScrollReveal>
             <div className="mx-auto mt-16 max-w-3xl rounded-md bg-stone-100 px-8 py-10 md:px-12 md:py-14">
-              <h2 className="heading-accent font-serif text-2xl">Warum hier abschalten</h2>
+              <h2 className="heading-accent font-serif text-2xl">{place.whyDisconnectHeading || 'Warum hier abschalten'}</h2>
               <ul className="mt-6 space-y-3">
                 {place.whyDisconnect.map((item) => (
                   <li
@@ -179,13 +245,13 @@ export default async function PlacePage({ params }: Args) {
         )}
 
         {/* Attributes + Price */}
-        {((place.attributes && place.attributes.length > 0) || place.priceRange) && (
+        {((place.attributes && place.attributes.length > 0) || (!place.quietnessLevel && place.priceRange)) && (
           <ScrollReveal>
             <div className="mx-auto mt-12 flex max-w-3xl flex-wrap items-center gap-3">
               {place.attributes?.map((attr) => (
                 <AttributeTag key={attr} attribute={attr} />
               ))}
-              {place.priceRange && (
+              {!place.quietnessLevel && place.priceRange && (
                 <span className="ml-2 text-sm">
                   <PriceRange range={place.priceRange} />
                 </span>
@@ -194,24 +260,34 @@ export default async function PlacePage({ params }: Args) {
           </ScrollReveal>
         )}
 
-        {/* Outbound Link */}
-        {place.outboundUrl && (
+        {/* Audience */}
+        {place.audience && place.audience.length > 0 && (
           <ScrollReveal>
-            <div className="mx-auto mt-12 max-w-3xl">
-              <a
-                href={place.outboundUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group inline-flex items-center gap-3 bg-accent-dark px-8 py-4 text-sm tracking-wide text-white transition-all duration-300 hover:bg-accent"
-              >
-                Website besuchen
-                <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">
-                  &rarr;
-                </span>
-              </a>
+            <div className="mx-auto mt-6 max-w-3xl">
+              <p className="mb-2 text-xs font-medium uppercase tracking-widest text-stone-400">
+                Für wen geeignet
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {place.audience.map((a) => (
+                  <AudienceTag key={a} value={a} />
+                ))}
+              </div>
             </div>
           </ScrollReveal>
         )}
+
+        {/* CTA: Anfrage senden + Website */}
+        <ScrollReveal>
+          <div className="mx-auto mt-12 max-w-3xl">
+            <PlaceCTA
+              placeId={place.id}
+              placeTitle={place.title}
+              heroImage={place.heroImage}
+              outboundUrl={place.outboundUrl}
+              ctaLabel={place.ctaLabel}
+            />
+          </div>
+        </ScrollReveal>
 
         {/* Gallery — Mixed Aspect Ratios */}
         {place.gallery && place.gallery.length > 0 && (
