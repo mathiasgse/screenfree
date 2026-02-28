@@ -530,7 +530,7 @@ export interface DiscoveryRun {
     candidatesFound?: number | null;
     newCandidates?: number | null;
     duplicatesSkipped?: number | null;
-    errors?: number | null;
+    errorCount?: number | null;
   };
   progress?: {
     phase?: ('searching' | 'processing' | 'finalizing') | null;
@@ -910,7 +910,7 @@ export interface DiscoveryRunsSelect<T extends boolean = true> {
         candidatesFound?: T;
         newCandidates?: T;
         duplicatesSkipped?: T;
-        errors?: T;
+        errorCount?: T;
       };
   progress?:
     | T

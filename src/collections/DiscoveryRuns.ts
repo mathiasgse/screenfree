@@ -70,7 +70,7 @@ export const DiscoveryRuns: CollectionConfig = {
           defaultValue: 0,
         },
         {
-          name: 'errors',
+          name: 'errorCount',
           type: 'number',
           defaultValue: 0,
         },

@@ -5,6 +5,7 @@ import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { seoPlugin } from '@payloadcms/plugin-seo'
+import { resendAdapter } from '@payloadcms/email-resend'
 import sharp from 'sharp'
 
 import { Users } from './collections/Users'
@@ -70,5 +71,10 @@ export default buildConfig({
     url: process.env.MONGODB_URI || '',
   }),
   sharp,
+  email: resendAdapter({
+    defaultFromAddress: 'noreply@still.place',
+    defaultFromName: 'Stille Orte',
+    apiKey: process.env.RESEND_API_KEY || '',
+  }),
   plugins,
 })

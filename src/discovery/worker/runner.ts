@@ -116,7 +116,7 @@ export async function runDiscovery(options: DiscoveryOptions): Promise<RunStats>
     candidatesFound: 0,
     newCandidates: 0,
     duplicatesSkipped: 0,
-    errors: 0,
+    errorCount: 0,
   }
 
   // --- Initialize Payload early (for progress tracking) ---
@@ -181,7 +181,7 @@ export async function runDiscovery(options: DiscoveryOptions): Promise<RunStats>
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
       console.error(`[runner] Search error for "${query}": ${message}`)
-      stats.errors++
+      stats.errorCount++
     }
 
     searchesCompleted++
@@ -414,7 +414,7 @@ export async function runDiscovery(options: DiscoveryOptions): Promise<RunStats>
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
       console.error(`${progress} Error: ${message}`)
-      stats.errors++
+      stats.errorCount++
     }
 
     // Update progress every 5 candidates or on last one
@@ -451,7 +451,7 @@ export async function runDiscovery(options: DiscoveryOptions): Promise<RunStats>
             candidatesFound: stats.candidatesFound,
             newCandidates: stats.newCandidates,
             duplicatesSkipped: stats.duplicatesSkipped,
-            errors: stats.errors,
+            errorCount: stats.errorCount,
           },
         },
       })

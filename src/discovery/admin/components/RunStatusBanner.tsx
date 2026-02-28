@@ -17,7 +17,7 @@ interface RunData {
     candidatesFound?: number
     newCandidates?: number
     duplicatesSkipped?: number
-    errors?: number
+    errorCount?: number
   }
   progress?: {
     phase?: 'searching' | 'processing' | 'finalizing' | null
@@ -234,8 +234,8 @@ export const RunStatusBanner: React.FC<RunStatusBannerProps> = ({ runId, onCompl
               {runData.stats.candidatesFound ?? 0} gefunden
               {' \u00b7 '}{runData.stats.newCandidates ?? 0} neu
               {' \u00b7 '}{runData.stats.duplicatesSkipped ?? 0} Duplikate
-              {(runData.stats.errors ?? 0) > 0 && (
-                <>{' \u00b7 '}{runData.stats.errors} Fehler</>
+              {(runData.stats.errorCount ?? 0) > 0 && (
+                <>{' \u00b7 '}{runData.stats.errorCount} Fehler</>
               )}
             </div>
           )}
@@ -246,7 +246,7 @@ export const RunStatusBanner: React.FC<RunStatusBannerProps> = ({ runId, onCompl
               {runData.stats.candidatesFound ?? 0} gefunden
               {' \u00b7 '}{runData.stats.newCandidates ?? 0} neu
               {' \u00b7 '}{runData.stats.duplicatesSkipped ?? 0} Duplikate
-              {' \u00b7 '}{runData.stats.errors ?? 0} Fehler
+              {' \u00b7 '}{runData.stats.errorCount ?? 0} Fehler
             </div>
           )}
 

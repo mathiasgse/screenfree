@@ -78,5 +78,5 @@ export interface RunStats {
   candidatesFound: number
   newCandidates: number
   duplicatesSkipped: number
-  errors: number
+  errorCount: number
 }

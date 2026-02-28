@@ -69,10 +69,10 @@ async function main(): Promise<void> {
   console.log('=== Scraper Complete ===')
   console.log(`Created:  ${stats.newCandidates}`)
   console.log(`Skipped:  ${stats.duplicatesSkipped}`)
-  console.log(`Errors:   ${stats.errors}`)
+  console.log(`Errors:   ${stats.errorCount}`)
   console.log('========================')
 
-  process.exit(stats.errors > 0 && stats.newCandidates === 0 ? 1 : 0)
+  process.exit(stats.errorCount > 0 && stats.newCandidates === 0 ? 1 : 0)
 }
 
 main()

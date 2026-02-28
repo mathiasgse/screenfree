@@ -74,7 +74,7 @@ async function main(): Promise<void> {
     console.log(`Candidates found:   ${stats.candidatesFound}`)
     console.log(`New candidates:     ${stats.newCandidates}`)
     console.log(`Duplicates skipped: ${stats.duplicatesSkipped}`)
-    console.log(`Errors:             ${stats.errors}`)
+    console.log(`Errors:             ${stats.errorCount}`)
     console.log('==========================')
 
     process.exit(0)

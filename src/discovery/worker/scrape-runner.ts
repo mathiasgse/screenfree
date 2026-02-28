@@ -82,7 +82,7 @@ export async function runHuettenScraper(options: HuettenScraperOptions): Promise
     candidatesFound: urls.length,
     newCandidates: 0,
     duplicatesSkipped: 0,
-    errors: 0,
+    errorCount: 0,
   }
 
   // Lazy-import scrapers to keep startup fast
@@ -141,7 +141,7 @@ export async function runHuettenScraper(options: HuettenScraperOptions): Promise
 
     if (!platform) {
       console.error(`${progress} Unknown platform, skipping: ${url}`)
-      stats.errors++
+      stats.errorCount++
       continue
     }
 
@@ -239,7 +239,7 @@ export async function runHuettenScraper(options: HuettenScraperOptions): Promise
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
       console.error(`${progress} Error: ${message}`)
-      stats.errors++
+      stats.errorCount++
     }
 
     // Update progress every 5 candidates or on last one
@@ -276,7 +276,7 @@ export async function runHuettenScraper(options: HuettenScraperOptions): Promise
             candidatesFound: stats.candidatesFound,
             newCandidates: stats.newCandidates,
             duplicatesSkipped: stats.duplicatesSkipped,
-            errors: stats.errors,
+            errorCount: stats.errorCount,
           },
         },
       })
